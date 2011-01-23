@@ -11,44 +11,85 @@
 #include <nt2/include/functions/powi.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::pow_, tag::cpu_,
+                     (A0)(A1),
+                     (arithmetic_<A0>)(arithmetic_<A1>)
+                    )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for pow
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute pow(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<pow_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::pow_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::floating(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A1,
-      (3, (float,double,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,  float)
+    NT2_FUNCTOR_CALL(2)
     {
-        return ::powf(a0, a1); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, double)
-    {
-       return ::pow(a0, a1);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type type; 
+      typedef typename NT2_RETURN_TYPE(2)::type type;
       return nt2::powi(type(a0), a1);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::pow_, tag::cpu_,
+                     (A0)(A1),
+                     (double_<A0>)(double_<A1>)
+                    )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::pow_(tag::double_,tag::double_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::floating(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+       return ::pow(a0, a1);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::pow_, tag::cpu_,
+                     (A0)(A1),
+                     (float_<A0>)(float_<A1>)
+                    )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::pow_(tag::float_,tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::floating(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+        return ::powf(a0, a1);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

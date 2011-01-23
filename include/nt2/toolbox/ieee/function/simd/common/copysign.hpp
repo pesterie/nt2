@@ -15,43 +15,91 @@
 #include <nt2/include/functions/signnz.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for copysign
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute copysign(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<copysign_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::copysign_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<arithmetic_<A0>,X>))
+                           ((simd_<arithmetic_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::copysign_(tag::simd_(tag::arithmetic_, X),
+                             tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (real_,unsigned_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-	return b_or(abs(a0), bitofsign(a1));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,   unsigned_)
-    {
-      details::ignore_unused(a1); 
-      return  a0; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
         return  signnz(a1)*abs(a0);
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::copysign_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<unsigned_<A0>,X>))
+                           ((simd_<unsigned_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::copysign_(tag::simd_(tag::unsigned_, X),
+                             tag::simd_(tag::unsigned_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      details::ignore_unused(a1);
+      return  a0;
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::copysign_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<real_<A0>,X>))
+                           ((simd_<real_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::copysign_(tag::simd_(tag::real_, X),
+                             tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return b_or(abs(a0), bitofsign(a1));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

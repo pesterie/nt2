@@ -15,45 +15,93 @@
 #include <nt2/include/functions/select.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for negation
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute negation(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<negation_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<arithmetic_<A0>,X>))
+                           ((simd_<arithmetic_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::arithmetic_, X),
+                             tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (real_,unsigned,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-	A0 tmp = isnez(a1)&a0;
-	tmp = select(isltz(a1), -a0, tmp);
-	tmp = seladd(isnan(a1), tmp, a1); //TODO signed Nan ?
-        return tmp;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,    unsigned)
-    {
-        return  isnez(a1)&a0;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
         return  sel(isltz(a1),-a0,isnez(a1)&a0);
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<unsigned_<A0>,X>))
+                           ((simd_<unsigned_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::unsigned_, X),
+                             tag::simd_(tag::unsigned_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
+    {
+        return  isnez(a1)&a0;
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<real_<A0>,X>))
+                           ((simd_<real_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::real_, X),
+                             tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      A0 tmp = isnez(a1)&a0;
+      tmp = select(isltz(a1), -a0, tmp);
+      tmp = seladd(isnan(a1), tmp, a1); //TODO signed Nan ?
+        return tmp;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

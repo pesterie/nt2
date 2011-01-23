@@ -1,13 +1,13 @@
-/*******************************************************************************
- *         Copyright 2003 & onward LASMEA UMR 6602 CNRS/U.B.P
- *         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
- *
- *          Distributed under the Boost Software License, Version 1.0.
- *                 See accompanying file LICENSE.txt or copy at
- *                     http://www.boost.org/LICENSE_1_0.txt
- ******************************************************************************/
-#ifndef NT2_CORE_NUMERIC_FUNCTION_DETAILS_SIMD_COMMON_IMPL_TRIGO_D_TRIG_EVALUATION_HPP_INCLUDED
-#define NT2_CORE_NUMERIC_FUNCTION_DETAILS_SIMD_COMMON_IMPL_TRIGO_D_TRIG_EVALUATION_HPP_INCLUDED
+//////////////////////////////////////////////////////////////////////////////
+///   Copyright 2003 and onward LASMEA UMR 6602 CNRS/U.B.P Clermont-Ferrand
+///   Copyright 2009 and onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+///
+///          Distributed under the Boost Software License, Version 1.0
+///                 See accompanying file LICENSE.txt or copy at
+///                     http://www.boost.org/LICENSE_1_0.txt
+//////////////////////////////////////////////////////////////////////////////
+#ifndef NT2_TOOLBOX_TRIGONOMETRIC_FUNCTION_SIMD_COMMON_IMPL_TRIGO_D_TRIG_EVALUATION_HPP_INCLUDED
+#define NT2_TOOLBOX_TRIGONOMETRIC_FUNCTION_SIMD_COMMON_IMPL_TRIGO_D_TRIG_EVALUATION_HPP_INCLUDED
 #include <nt2/include/functions/fma.hpp>
 #include <nt2/include/functions/rec.hpp>
 #include <nt2/sdk/simd/tags.hpp>
@@ -43,7 +43,7 @@ namespace nt2
 							     0xbf2a01a019bfdf03ll, 
 							     0x3f8111111110f7d0ll, 
 							     0xbfc5555555555548ll) ) > (z);
-          return fma(mul(y1,z),x,x);
+          return fma(y1*z,x,x);
 	}
 	static inline A0 base_tancot_eval(const A0 z)
 	{
@@ -61,12 +61,12 @@ namespace nt2
 	static inline A0 tan_eval(const A0 z, const A0,  const int_type n )
 	{
 	  A0 y = base_tancot_eval(z); 
-	  return sel(iseq(n, One<int_type>()),y,-rec(y)); 
+	  return sel(is_equal(n, One<int_type>()),y,-rec(y)); 
 	}
 	static inline A0 cot_eval(const A0 z, const A0 ,  const int_type n )
 	{	  
 	  A0 y = base_tancot_eval(z); 
-	  return sel(iseq(n, One<int_type>()),-rec(y),y); 
+	  return sel(is_equal(n, One<int_type>()),rec(y),-y); 
 	}
       };
       

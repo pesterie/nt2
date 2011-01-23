@@ -12,47 +12,58 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rshr_, tag::cpu_,
+                      (A0)(A1),
+                      (arithmetic_<A0>)(arithmetic_<A1>)
+                     )
+
+namespace nt2 { namespace ext
 {
-
-  template<class Info>
-  struct validate<rshr_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> :
-      boost::is_integral<typename meta::strip<A1>::type >{}; 
-
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute rshr(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<rshr_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::rshr_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
     struct result<This(A0,A1)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-      typename meta::as_bits<A0>::type t0 = {a0};
-      t0.bits = (a1>0) ? t0.bits >> a1 : t0.bits << -a1;
-      return t0.value;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
       return (a1>0) ? a0 >> a1 : a0 << -a1;
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rshr_, tag::cpu_,
+                      (A0)(A1),
+                      (real_<A0>)(real_<A1>)
+                     )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::rshr_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typename meta::as_bits<A0>::type t0 = {a0};
+      t0.bits = (a1>0) ? t0.bits >> a1 : t0.bits << -a1;
+      return t0.value;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

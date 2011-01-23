@@ -14,67 +14,65 @@
 #include <nt2/include/functions/max.hpp>
 #include <nt2/include/functions/any.hpp>
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<comparator_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1,class A2>
-    struct result<This(A0,A1,A2)> :boost::is_integral<A2>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute comparator(const A0& a0, const A1& a1, const A2& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<comparator_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::comparator_, tag::cpu_,
+                            (A0)(A1)(A2),
+                            (fundamental_<A0>)(fundamental_<A1>)(fundamental_<A2>)
+                           )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::comparator_(tag::fundamental_,tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A2>
     struct result<This(A0, A0, A2)>
     {
-      typedef boost::fusion::tuple<A0,A0, bool>     type;
+      typedef typename meta::strip<A0>::type           stA0;
+      typedef boost::fusion::tuple<stA0,stA0,bool>     type;
     };
 
     NT2_FUNCTOR_CALL(3)
     {
-      typename NT2_CALL_RETURN_TYPE(3)::type res;
-      eval( a0, a1, a2 
+      typename NT2_RETURN_TYPE(3)::type res;
+      eval( a0, a1, a2
            , boost::fusion::at_c<0>(res)
            , boost::fusion::at_c<1>(res)
            , boost::fusion::at_c<2>(res)
            );
       return res;
     }
-
   private:
     template<class A0,class A2,class R0,class R1> inline void
     eval(A0 const& a0, A0 const& a1, A2 const& a2, R0& r0, R1& r1, bool& modified)const
     {
       r0 = a0;
-      r1 = a1; 
+      r1 = a1;
       if (a2)
-	{
-	  if ( (modified = (a0 > a1)) ) std::swap(r0, r1); 
-	}
+      {
+        if ( (modified = (a0 > a1)) ) std::swap(r0, r1);
+      }
       else
-	{
-	  if ( (modified = (a1 > a0)) ) std::swap(r0, r1); 
-	}
+      {
+        if ( (modified = (a1 > a0)) ) std::swap(r0, r1);
+      }
 //       r0 =  nt2::min(a0, a1);
 //       r1 =  nt2::max(a0, a1);
 //       if (a2) {
-// 	A0 t =  r1;
-// 	r1 = r0;
-// 	r0 = t;
+//    A0 t =  r1;
+//    r1 = r0;
+//    r0 = t;
 //       }
-//       modified = any(a0-r0); 
+//       modified = any(a0-r0);
     }
 
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

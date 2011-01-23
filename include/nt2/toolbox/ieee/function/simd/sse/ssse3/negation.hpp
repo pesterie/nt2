@@ -11,41 +11,141 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for negation
 
-  template<class Extension,class Info>
-  struct call<negation_,tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is uint32_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0),
+                           ((simd_<uint32_<A0>,tag::sse_>))
+                           ((simd_<uint32_<A0>,tag::sse_>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::uint32_, tag::sse_),
+                             tag::simd_(tag::uint32_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (5, (real_,int32_t,int16_t,int8_t,uint32_t))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+       /*PUT CODE HERE*/
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,    real_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int32_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0),
+                           ((simd_<int32_<A0>,tag::sse_>))
+                           ((simd_<int32_<A0>,tag::sse_>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::int32_, tag::sse_),
+                             tag::simd_(tag::int32_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
        /*PUT CODE HERE*/
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,  int32_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int16_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0),
+                           ((simd_<int16_<A0>,tag::sse_>))
+                           ((simd_<int16_<A0>,tag::sse_>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::int16_, tag::sse_),
+                             tag::simd_(tag::int16_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
        /*PUT CODE HERE*/
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,  int16_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int8_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0),
+                           ((simd_<int8_<A0>,tag::sse_>))
+                           ((simd_<int8_<A0>,tag::sse_>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::int8_, tag::sse_),
+                             tag::simd_(tag::int8_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
        /*PUT CODE HERE*/
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,   int8_t)
-    {
-       /*PUT CODE HERE*/
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, uint32_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                           (A0),
+                           ((simd_<real_<A0>,tag::sse_>))
+                           ((simd_<real_<A0>,tag::sse_>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::simd_(tag::real_, tag::sse_),
+                             tag::simd_(tag::real_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
        /*PUT CODE HERE*/
     }
@@ -53,3 +153,4 @@ namespace nt2 { namespace functors
 } }
 
 #endif
+// modified by jt the 04/01/2011

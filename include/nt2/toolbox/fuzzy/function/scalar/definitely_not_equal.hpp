@@ -14,34 +14,51 @@
 #include <nt2/include/functions/is_nan.hpp>
 #include <nt2/include/functions/successor.hpp>
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<definitely_not_equal_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1,class A2>
-    struct result<This(A0,A1,A2)> : 
-      boost::is_integral<A2>{};
-  }; 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute definitely_not_equal(const A0& a0, const A1& a1, const A2& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<definitely_not_equal_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::definitely_not_equal_, tag::cpu_,
+                                      (A0)(A1)(A2),
+                                      (arithmetic_<A0>)(arithmetic_<A1>)(arithmetic_<A2>)
+                                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::definitely_not_equal_(tag::arithmetic_,tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1,class A2>
     struct result<This(A0,A1,A2)>  {typedef bool type; };
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      3,
-      A0,
-      (2, (real_,arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(3)
+    {
+        return dist(a0, a1) > a2;
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(3,       real_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::definitely_not_equal_, tag::cpu_,
+                                      (A0)(A1)(A2),
+                                      (real_<A0>)(real_<A1>)(real_<A2>)
+                                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::definitely_not_equal_(tag::real_,tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1,class A2>
+    struct result<This(A0,A1,A2)>  {typedef bool type; };
+
+    NT2_FUNCTOR_CALL(3)
     {
       if (a0 == a1) return false;
       if (isinf(a0) || isinf(a1)) return (a0 != a1);
@@ -52,13 +69,8 @@ namespace nt2 { namespace functors
       // assert(aa2 > 0 && aa2 < bitinteger(Nan<select_type>()) );
       return  (a0 > successor(a1,a2)) || (a0 < successor(a1,-a2));
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(3, arithmetic_)
-    {
-        return dist(a0, a1) > a2;
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

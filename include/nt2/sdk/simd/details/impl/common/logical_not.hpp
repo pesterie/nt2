@@ -11,16 +11,25 @@
 
 #include <nt2/sdk/meta/strip.hpp>
 
-namespace nt2 { namespace functors
+namespace nt2 { namespace ext
 {
-  template<class C, class X,class Info>
-  struct call<logical_not_,tag::simd_(C,X),Info>
+  template<class X,class Dummy>
+  struct  call< tag::logical_not_ ( tag::simd_(tag::arithmetic_,X)
+                                  , tag::simd_(tag::arithmetic_,X)
+                                  )
+              , tag::cpu_, Dummy
+              >
+        : callable
   {
     template<class Sig> struct result;
     template<class This,class A>
     struct result<This(A)> : meta::strip<A> {};
 
-    NT2_FUNCTOR_CALL(1) { return eq(a0,Zero<A0>()); }
+    NT2_FUNCTOR_CALL(1)
+    {
+      A0 that = { nt2::eq(a0,nt2::Zero<A0>()) };
+      return that;
+    }
   };
 } }
 

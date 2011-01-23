@@ -13,37 +13,56 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for is_ltz
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_ltz(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<is_ltz_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is signed_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_ltz_, tag::cpu_,
+                         (A0)(X),
+                         ((simd_<signed_<A0>,X>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::is_ltz_(tag::simd_(tag::signed_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (unsigned_,signed_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,   unsigned_)
+    NT2_FUNCTOR_CALL(1)
     {
-      return False<A0>(); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     signed_)
-    {
-      return lt(a0, Zero<A0>()); 
+      return lt(a0, Zero<A0>());
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_ltz_, tag::cpu_,
+                         (A0)(X),
+                         ((simd_<unsigned_<A0>,X>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::is_ltz_(tag::simd_(tag::unsigned_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return False<A0>();
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

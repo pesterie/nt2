@@ -11,25 +11,30 @@
 
 #include <nt2/include/functions/is_nez.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_true_, tag::cpu_,
+                         (A0),
+                         (fundamental_<A0>)
+                        )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for is_true
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_true(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<is_true_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::is_true_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
-    typedef bool result_type; 
+    typedef bool result_type;
+
     NT2_FUNCTOR_CALL(1)
     {
-      return is_nez(a0); 
+      return is_nez(a0);
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

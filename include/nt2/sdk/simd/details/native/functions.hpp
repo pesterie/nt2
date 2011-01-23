@@ -18,6 +18,5 @@
 #include NT2_SIMD_INCLUDE(store.hpp)
 
 #include <nt2/sdk/simd/details/impl/map.hpp>
-#include <nt2/sdk/simd/details/impl/make.hpp>
 
 #endif

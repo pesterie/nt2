@@ -9,24 +9,12 @@
 #define NT2_UNIT_MODULE "nt2::meta::as_real SIMD"
 
 #include <nt2/sdk/simd/native.hpp>
-#include <unit/sdk/simd/types.hpp>
 #include <nt2/sdk/meta/as_real.hpp>
 #include <boost/type_traits/is_same.hpp>
 
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Generates sequence of supported real types for SIMD
-////////////////////////////////////////////////////////////////////////////////
-#if defined(NT2_SIMD_SSE_FAMILY)
-#define NT2_SIMD_REAL_TYPES (double)(nt2::uint64_t)(nt2::int64_t) \
-                            (float)(nt2::uint32_t)(nt2::int32_t)  \
-/**/
-#elif defined(NT2_SIMD_VMX_FAMILY)
-#define NT2_SIMD_REAL_TYPES  (float)(nt2::uint32_t)(nt2::int32_t)
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test that as_real on SIMD

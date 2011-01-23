@@ -10,19 +10,20 @@
 #define NT2_TOOLBOX_PREDICATES_FUNCTION_SCALAR_MAJORITY_HPP_INCLUDED
 
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<majority_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef boost::mpl::true_ result_type;
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute majority(const A0& a0, const A1& a1, const A2& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<majority_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::majority_, tag::cpu_,
+                          (A0)(A1)(A2),
+                          (fundamental_<A0>)(fundamental_<A1>)(fundamental_<A2>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::majority_(tag::fundamental_,tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1,class A2>
@@ -32,9 +33,9 @@ namespace nt2 { namespace functors
     {
         return (a0&&a1)||(a1&&a2)||(a2&&a0);
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

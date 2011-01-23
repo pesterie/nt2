@@ -14,38 +14,42 @@
 #include <nt2/sdk/meta/as_bits.hpp>
 
 #include <nt2/include/functions/is_positive.hpp>
+//#include <iostream>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::bitinteger_, tag::cpu_,
+                            (A0),
+                            (fundamental_<A0>)
+                           )
+
+namespace nt2 { namespace ext
 {
-
-  template<class Info>
-  struct validate<bitinteger_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::bitinteger_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> :
-             meta::is_floating_point<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute bitinteger(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<bitinteger_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)>
-      : meta::as_integer<A0, signed>{};
+    struct result<This(A0)> : meta::as_integer<A0, signed>{};
 
     NT2_FUNCTOR_CALL(1)
     {
       typedef typename meta::as_bits<A0, signed>::type type;
+      typedef typename meta::as_integer<A0, signed>::type itype;
       type that = {a0};
-      return is_positive(a0) ? that.bits : Signmask<A0>()-that.bits;
+//       std::cout <<  "a0         " << a0                  << std::endl;
+//       std::cout <<  "is_positive(a0) " << is_positive(a0)                  << std::endl;
+//       std::cout << "that.bits " <<  that.bits          << std::endl;
+//       std::cout << "Signmask  " <<  Signmask<itype>()  << std::endl;
+//       std::cout << "S-that    " << Signmask<itype>()-that.bits << std::endl;
+      return is_positive(a0) ? that.bits : Signmask<itype>()-that.bits;
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

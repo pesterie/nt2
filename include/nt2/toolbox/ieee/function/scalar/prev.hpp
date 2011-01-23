@@ -10,44 +10,85 @@
 #define NT2_TOOLBOX_IEEE_FUNCTION_SCALAR_PREV_HPP_INCLUDED
 #include <nt2/sdk/constant/digits.hpp>
 #include <nt2/sdk/constant/infinites.hpp>
+#include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::prev_, tag::cpu_,
+                      (A0),
+                      (arithmetic_<A0>)
+                     )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for prev
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute prev(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<prev_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::prev_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> {typedef A0 type; };
+      struct result<This(A0)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (3, (float,double,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  float)
+    NT2_FUNCTOR_CALL(1)
     {
-      return ::nextafterf(a0, Minf<A0>());
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, double)
-    {
-      return ::nextafter(a0, Minf<A0>());
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      return a0-One<A0>(); 
+      return a0-One<A0>();
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::prev_, tag::cpu_,
+                      (A0),
+                      (double_<A0>)
+                     )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::prev_(tag::double_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+      struct result<This(A0)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return ::nextafter(a0, Minf<A0>());
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::prev_, tag::cpu_,
+                      (A0),
+                      (float_<A0>)
+                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::prev_(tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+      struct result<This(A0)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return ::nextafterf(a0, Minf<A0>());
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

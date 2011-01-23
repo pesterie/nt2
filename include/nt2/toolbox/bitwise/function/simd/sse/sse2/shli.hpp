@@ -14,63 +14,130 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type8_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shli_, tag::cpu_,
+                       (A0)(A1),
+                       ((simd_<type8_<A0>,tag::sse_>))
+                       ((integer_<A1>))
+                      );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<shli_,tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class Dummy>
+  struct call<tag::shli_(tag::simd_(tag::type8_, tag::sse_),
+                         tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> :
-      boost::mpl::and_<meta::is_scalar<A1>
-                      ,meta::is_integral<A1>
-                      > {};
+    template<class This,class A0, class A1>
+    struct result<This(A0,A1)>  : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename NT2_RETURN_TYPE(2)::type result_type;
+      typedef simd::native<typename meta::int64_t_<A0>::type,tag::sse_> gen_type;
+      result_type const Mask1 =  simd::native_cast<result_type>(integral_constant<gen_type, 0x00ff00ff00ff00ffll>());
+      result_type const Mask2 =  simd::native_cast<result_type>(integral_constant<gen_type, 0xff00ff00ff00ff00ll>());
+      result_type tmp  = b_and(a0, Mask1);
+      result_type tmp1 = {_mm_slli_epi16(tmp, a1)};
+      tmp1 = b_and(tmp1, Mask1);
+      tmp = b_and(a0, Mask2);
+      result_type tmp3 = {_mm_slli_epi16(tmp, a1)};
+      result_type tmp2 = b_and(tmp3, Mask2);
+      return tmp1 | tmp2;	
+    }
   };
-  template<class Extension,class Info>
-  struct call<shli_,tag::simd_(tag::arithmetic_,Extension),Info>
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type32_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shli_, tag::cpu_,
+                       (A0)(A1),
+                       ((simd_<type32_<A0>,tag::sse_>))
+                       ((integer_<A1>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::shli_(tag::simd_(tag::type32_, tag::sse_),
+                         tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0, class A1>
     struct result<This(A0,A1)>  : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (4, (types64_,types32_,types16_,types8_))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+        typedef typename meta::as_integer<A0,signed>::type sint;
+      sint const that = { _mm_slli_epi32(simd::native_cast<sint>(a0),a1)};
+            return simd::native_cast<A0>(that);
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,     types64_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type64_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shli_, tag::cpu_,
+                       (A0)(A1),
+                       ((simd_<type64_<A0>,tag::sse_>))
+                       ((integer_<A1>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::shli_(tag::simd_(tag::type64_, tag::sse_),
+                         tag::integer_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>
+    struct result<This(A0,A1)>  : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
         typedef typename meta::as_integer<A0,signed>::type sint;
         sint const that ={ _mm_slli_epi64(simd::native_cast<sint>(a0), a1)};
         return simd::native_cast<A0>(that);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,     types32_)
-    {
-        typedef typename meta::as_integer<A0,signed>::type sint;
-	sint const that = { _mm_slli_epi32(simd::native_cast<sint>(a0),a1)};
-       	return simd::native_cast<A0>(that); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,     types16_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type16_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shli_, tag::cpu_,
+                       (A0)(A1),
+                       ((simd_<type16_<A0>,tag::sse_>))
+                       ((integer_<A1>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::shli_(tag::simd_(tag::type16_, tag::sse_),
+                         tag::integer_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>
+    struct result<This(A0,A1)>  : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
       A0 that = {_mm_slli_epi16(a0, a1)};
       return that;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,      types8_)
-    {
-        typedef typename NT2_CALL_RETURN_TYPE(2)::type result_type;
-	typedef simd::native<typename meta::int64_t_<A0>::type,tag::sse_> gen_type; 
-        result_type const Mask1 =  simd::native_cast<result_type>(integral_constant<gen_type, 0x00ff00ff00ff00ffll>());
-	result_type const Mask2 =  simd::native_cast<result_type>(integral_constant<gen_type, 0xff00ff00ff00ff00ll>());
-	result_type tmp  = b_and(a0, Mask1);
-        result_type tmp1 = {_mm_slli_epi16(tmp, a1)};
-        tmp = b_and(a0, Mask2);
-	result_type tmp3 = {_mm_slli_epi16(tmp, a1)}; 
-        result_type tmp2 = b_and(tmp3, Mask2);
-        return tmp1 | tmp2;
-
     }
   };
 } }
 
 #endif
+// modified by jt the 04/01/2011
+// modified manually jt the 05/01/2011    

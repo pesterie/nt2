@@ -86,11 +86,32 @@ namespace nt2 { namespace memory
     ////////////////////////////////////////////////////////////////////////////
     pointer resize(pointer p, size_type n, size_type o )
     {
-      byte* bp  = reinterpret_cast<byte*>(p);
-      byte* ptr = memory::reallocate(bp,n*sizeof(value_type),o*sizeof(value_type));
-      return reinterpret_cast<pointer>(ptr);
+      if( o < n )
+      {
+        byte* ptr = reallocate( reinterpret_cast<byte*>(p)
+                              , n*sizeof(value_type)
+                              , o*sizeof(value_type)
+                              );
+        return reinterpret_cast<pointer>(ptr);
+      }
+      else
+      {
+        return p;
+      }
     }
   };
+
+  template<class T>
+  bool operator== (allocator<T> const&, allocator<T> const&)
+  {
+    return true;
+  }
+
+  template<class T>
+  bool operator!= (allocator<T> const&, allocator<T> const&)
+  {
+    return false;
+  }
 } }
 
 #endif

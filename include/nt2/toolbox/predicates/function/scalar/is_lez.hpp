@@ -11,28 +11,30 @@
 #include <nt2/sdk/constant/digits.hpp>
 
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<is_lez_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_lez_, tag::cpu_,
+                        (A0),
+                        (fundamental_<A0>)
+                       )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_lez_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
-    typedef boost::mpl::true_ result_type;
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_lez(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<is_lez_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef bool result_type; 
+    typedef bool result_type;
+
     NT2_FUNCTOR_CALL(1)
     {
-      return a0 <=  Zero<A0>(); 
+      return a0 <=  Zero<A0>();
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

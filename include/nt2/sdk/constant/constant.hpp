@@ -13,7 +13,6 @@
 // Main generic constant class
 //* TODO:  Documentation: http://nt2.lri.fr/sdk/constant/entity/constant.html
 ////////////////////////////////////////////////////////////////////////////////
-#include <nt2/sdk/constant/category.hpp>
 #include <nt2/sdk/functor/functor.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +23,7 @@ template<class Target> inline                                       \
 typename nt2::meta::enable_call<TAG(nt2::meta::as_<Target>)>::type  \
 NAME()                                                              \
 {                                                                   \
-  nt2::functors::functor<TAG> callee;                               \
+  nt2::functor<TAG> callee;                                         \
   return callee( nt2::meta::as_<Target>() );                        \
 }                                                                   \
 /**/

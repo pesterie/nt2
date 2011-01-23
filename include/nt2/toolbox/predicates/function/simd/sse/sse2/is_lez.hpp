@@ -14,29 +14,79 @@
 
 #include <nt2/include/functions/is_eqz.hpp>
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for is_lez
 
-  template<class Extension,class Info>
-  struct call<is_lez_,tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_lez_, tag::cpu_,
+                         (A0),
+                         ((simd_<arithmetic_<A0>,tag::sse_>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_lez_(tag::simd_(tag::arithmetic_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (unsigned_,int64_t,arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(1)
+    {
+       return le(a0,Zero<A0>());
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(1,   unsigned_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_lez_, tag::cpu_,
+                         (A0),
+                         ((simd_<unsigned_<A0>,tag::sse_>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_lez_(tag::simd_(tag::unsigned_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
     {
         return is_eqz(a0);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     int64_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int64_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_lez_, tag::cpu_,
+                         (A0),
+                         ((simd_<int64_<A0>,tag::sse_>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_lez_(tag::simd_(tag::int64_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
     {
       return is_less(a0, Zero<A0>()); //TO DO
 //       typedef typename meta::int32_t_<A0>::type htype;
@@ -45,11 +95,8 @@ namespace nt2 { namespace functors
 //       const type tmp = { _mm_shuffle_epi32(tmp1, _MM_SHUFFLE(2, 2, 0, 0))};
 //       return  simd::native_cast<A0>(tmp);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-       return le(a0,Zero<A0>());
-    }
   };
 } }
 
 #endif
+// modified by jt the 04/01/2011

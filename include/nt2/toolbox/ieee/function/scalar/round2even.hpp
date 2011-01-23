@@ -15,30 +15,53 @@
 #include <nt2/sdk/meta/strip.hpp>
 #include <iostream>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::round2even_, tag::cpu_,
+                            (A0),
+                            (arithmetic_<A0>)
+                           )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for round2even
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute round2even(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<round2even_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::round2even_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
+      return a0;
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::round2even_, tag::cpu_,
+                            (A0),
+                            (real_<A0>)
+                           )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::round2even_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type type;
        const type v = abs(a0);
        const type t2n = Two2nmb<type>();
        volatile type d0 = (v+t2n);
@@ -47,13 +70,8 @@ namespace nt2 { namespace functors
        //      type q =  d;
        return a0 < 0? -d : d; //b_xor(d, nt2::bitofsign(a0));
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      return a0;
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

@@ -10,80 +10,227 @@
 #define NT2_SDK_SIMD_DETAILS_IMPL_SSE_SSE2_IS_LESS_HPP_INCLUDED
 
 #include <nt2/sdk/meta/strip.hpp>
-#include <nt2/sdk/meta/scalar_of.hpp>
+#include <nt2/sdk/meta/downgrade.hpp>
+#include <nt2/sdk/meta/as_integer.hpp>
 #include <nt2/sdk/simd/native_cast.hpp>
-#include <nt2/sdk/meta/make_integer.hpp>
 #include <nt2/sdk/constant/properties.hpp>
 
-namespace nt2 { namespace functors
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for double
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<double_<A0>,tag::sse_>))
+                        ((simd_<double_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
 {
-  template<class Info>
-  struct call<is_less_,tag::simd_(tag::arithmetic_,tag::sse_),Info>
+  template<class Dummy>
+  struct  call< tag::is_less_ ( tag::simd_(tag::double_,tag::sse_)
+                              , tag::simd_(tag::double_,tag::sse_)
+                              )
+              , tag::cpu_, Dummy
+              >
+        : callable
   {
-    template<class Sig> struct result;
-    template<class This,class A>
-    struct result<This(A,A)> : meta::strip<A> {};
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
 
-    NT2_FUNCTOR_CALL_DISPATCH( 2
-                             , typename nt2::meta::scalar_of<A0>::type
-                             , (7,(double,float,uint_,int8_,int16_,int32_,int64_))
-                             )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2, uint_)
-    {
-      typedef typename meta::as_integer<A0, signed>::type stype;
-      stype tmp1 = simd::native_cast<stype>(a0)-Signmask<stype>();
-      stype tmp2 = simd::native_cast<stype>(a1)-Signmask<stype>();
-      stype tmp  = lt(tmp1,tmp2);
-      return simd::native_cast<A0>(tmp);
-    }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,double)
+    NT2_FUNCTOR_CALL(2)
     {
       A0 that = { _mm_cmplt_pd(a0,a1) };
       return that;
     }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,float )
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for float
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<float_<A0>,tag::sse_>))
+                        ((simd_<float_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::float_,tag::sse_)
+                                , tag::simd_(tag::float_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
     {
       A0 that = { _mm_cmplt_ps(a0,a1) };
       return that;
     }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,int8_)
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for unsigned types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<unsigned_<A0>,tag::sse_>))
+                        ((simd_<unsigned_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::unsigned_,tag::sse_)
+                                , tag::simd_(tag::unsigned_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 that = { _mm_cmplt_epi8(a0,a1) };
+      typedef typename meta::as_integer<A0, signed>::type stype;
+      stype tmp1 = simd::native_cast<stype>(a0) - Signmask<stype>();
+      stype tmp2 = simd::native_cast<stype>(a1) - Signmask<stype>();
+      stype tmp = nt2::lt(tmp1,tmp2);
+      return simd::native_cast<A0>(tmp);
+    }
+  };
+} }
+
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for int8 types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<int8_<A0>,tag::sse_>))
+                        ((simd_<int8_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::int8_,tag::sse_)
+                                , tag::simd_(tag::int8_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      A0 that = { _mm_cmplt_epi8(a0,a1)  };
       return that;
     }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,int16_)
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for int16 types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<int16_<A0>,tag::sse_>))
+                        ((simd_<int16_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::int16_,tag::sse_)
+                                , tag::simd_(tag::int16_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 that = { _mm_cmplt_epi16(a0,a1) };
+      A0 that = { _mm_cmplt_epi16(a0,a1)  };
       return that;
     }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,int32_)
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for int32 types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<int32_<A0>,tag::sse_>))
+                        ((simd_<int32_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::int32_,tag::sse_)
+                                , tag::simd_(tag::int32_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 that = { _mm_cmplt_epi32(a0,a1) };
+      A0 that = { _mm_cmplt_epi32(a0,a1)  };
       return that;
     }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,int64_)
+////////////////////////////////////////////////////////////////////////////////
+// Overloads implementation for int64 types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::is_less_, tag::cpu_, (A0)
+                      , ((simd_<int64_<A0>,tag::sse_>))
+                        ((simd_<int64_<A0>,tag::sse_>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::is_less_( tag::simd_(tag::int64_,tag::sse_)
+                                , tag::simd_(tag::int64_,tag::sse_)
+                                )
+              , tag::cpu_, Dummy
+              >
+        : callable
+  {
+    template<class Sig>           struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> : meta::strip<A0> {};
+
+    NT2_FUNCTOR_CALL(2)
     {
-      typedef typename meta::scalar_of<A0>::type stype;
-      typedef typename meta::make_integer <  4, signed
-                                          , simd::native< boost::mpl::_
-                                                        , tag::sse_
-                                                        >
-                                          >::type type;
+      typedef typename meta::downgrade<A0, signed>::type type;
       type sa0 = { a0 };
       type sa1 = { a1 };
+      type al  = { _mm_shuffle_epi32(sa0, _MM_SHUFFLE(2, 2, 0, 0)) };
+      type bl  = { _mm_shuffle_epi32(sa1, _MM_SHUFFLE(2, 2, 0, 0)) };
+      type ah  = { _mm_shuffle_epi32(sa0, _MM_SHUFFLE(3, 3, 1, 1)) };
+      type bh  = { _mm_shuffle_epi32(sa1, _MM_SHUFFLE(3, 3, 1, 1)) };
 
-      type al = {_mm_shuffle_epi32(sa0, _MM_SHUFFLE(2, 2, 0, 0))};
-      type bl = {_mm_shuffle_epi32(sa1, _MM_SHUFFLE(2, 2, 0, 0))};
-      type ah = {_mm_shuffle_epi32(sa0, _MM_SHUFFLE(3, 3, 1, 1))};
-      type bh = {_mm_shuffle_epi32(sa1, _MM_SHUFFLE(3, 3, 1, 1))};
-      A0 that = { lt(ah, bh) | (eq(ah,bh) & lt(al,bl)) };
+      A0 that  = { nt2::lt(ah,bh) | (nt2::eq(ah,bh) & nt2::lt(al,bl)) };
       return that;
     }
   };

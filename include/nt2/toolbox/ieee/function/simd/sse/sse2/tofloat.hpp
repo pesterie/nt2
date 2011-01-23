@@ -21,63 +21,118 @@
 #include <nt2/include/functions/maximum.hpp>
 #include <nt2/include/functions/is_gez.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int32_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tofloat_, tag::cpu_,
+                          (A0),
+                          ((simd_<int32_<A0>,tag::sse_>))
+                         );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<tofloat_,tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class Dummy>
+  struct call<tag::tofloat_(tag::simd_(tag::int32_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> :
-      meta::has_larger_or_equal_size < A0
-				       , int32_t
-				       , meta::scalar_of<boost::mpl::_>
-                      > {};
-  };
-  template<class Extension,class Info>
-  struct call<tofloat_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)>
-      { typedef typename meta::as_real<A0>::type  type; };
+      struct result<This(A0)> : meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (5, (int32_t,int64_t,uint32_t,uint64_t,real_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      return a0; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     int32_t)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
+      typedef typename NT2_RETURN_TYPE(1)::type type;
       type that = { _mm_cvtepi32_ps(a0)};
       return that;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     int64_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is uint64_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tofloat_, tag::cpu_,
+                          (A0),
+                          ((simd_<uint64_<A0>,tag::sse_>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::tofloat_(tag::simd_(tag::uint64_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::as_real<A0>::type  type;
-      typedef typename meta::scalar_of<type>::type sftype; 
-      if (maximum(abs(a0)) > Valmax < int32_t > ())
-	{
-	  type const v = {{a0[0], a0[1]}};
-	   return v;
-	}
-      typedef typename meta::int32_t_<A0>::type htype; 
-      typedef simd::native<htype,tag::sse_> itype;
-      itype tmp = {_mm_shuffle_epi32(a0, _MM_SHUFFLE(3, 1, 2, 0))};
-      type v = { _mm_cvtepi32_pd(tmp)};
+      typedef typename NT2_RETURN_TYPE(1)::type  type;
+      typedef typename meta::scalar_of<type>::type stype;
+      type const v = {{static_cast<stype>(a0[0])
+                      , static_cast<stype>(a0[1])}};
       return v;
+
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    uint32_t)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tofloat_, tag::cpu_,
+                          (A0),
+                          ((simd_<real_<A0>,tag::sse_>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::tofloat_(tag::simd_(tag::real_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::as_real<A0>::type  result_type;
-      result_type z = {a0[0],a0[1],a0[2], a0[3]}; //TO DO
-      return z; 
+      return a0;
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is uint32_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tofloat_, tag::cpu_,
+                          (A0),
+                          ((simd_<uint32_<A0>,tag::sse_>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::tofloat_(tag::simd_(tag::uint32_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type  type;
+      typedef typename meta::scalar_of<type>::type stype;
+
+      type that = { static_cast<stype>(a0[0])
+                  , static_cast<stype>(a0[1])
+                  , static_cast<stype>(a0[2])
+                  , static_cast<stype>(a0[3])
+                  }; //TO DO
+      return that;
  //      typedef typename meta::scalar_of<A0>::type stype;
 //       typedef typename meta::as_integer<A0,signed>::type sint_type;
 //       //      static const sint_type hibitmask = integral_constant<sint_type, 1ll << (8*sizeof(stype)-1) >() ;
@@ -88,14 +143,47 @@ namespace nt2 { namespace functors
 //       v2 = v2+offset;
 //       return sel(is_gez(a00),v1,v2);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    uint64_t)
-    {
-      typedef typename meta::as_real<A0>::type  result_type;
-      result_type const v = {{a0[0], a0[1]}};
-      return v;
+  };
+} }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int64_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tofloat_, tag::cpu_,
+                          (A0),
+                          ((simd_<int64_<A0>,tag::sse_>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::tofloat_(tag::simd_(tag::int64_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type  type;
+      typedef typename meta::scalar_of<type>::type sftype;
+      if (maximum(abs(a0)) > Valmax<int32_t>())
+      {
+        type const v =  { static_cast<sftype>(a0[0])
+                        , static_cast<sftype>(a0[1])
+                        };
+         return v;
+      }
+      typedef typename meta::int32_t_<A0>::type htype;
+      typedef simd::native<htype,tag::sse_> itype;
+      itype tmp = {_mm_shuffle_epi32(a0, _MM_SHUFFLE(3, 1, 2, 0))};
+      type v = { _mm_cvtepi32_pd(tmp)};
+      return v;
     }
   };
 } }
 
 #endif
+// modified by jt the 04/01/2011
+// modified manually by jt the 06/01/2011

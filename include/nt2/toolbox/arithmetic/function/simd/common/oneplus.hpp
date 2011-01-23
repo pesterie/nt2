@@ -12,16 +12,20 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for oneplus
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute oneplus(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<oneplus_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::oneplus_, tag::cpu_,
+                          (A0)(X),
+                          ((simd_<arithmetic_<A0>,X>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::oneplus_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -30,10 +34,11 @@ namespace nt2 { namespace functors
 
     NT2_FUNCTOR_CALL(1)
     {
-      return a0+One<A0>(); 
+      return a0+One<A0>();
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

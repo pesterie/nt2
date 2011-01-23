@@ -30,34 +30,84 @@
 #include <nt2/include/functions/tofloat.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellik_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                        ((simd_<arithmetic_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<ellik_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> :
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute ellik(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<ellik_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::ellik_(tag::simd_(tag::arithmetic_, X),
+                          tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)> :  meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (float,double,arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return nt2::ellik(tofloat(a0), tofloat(a1));
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,  float)
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellik_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<double_<A0>,X>))
+                        ((simd_<double_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ellik_(tag::simd_(tag::double_, X),
+                          tag::simd_(tag::double_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return map(functor<tag::ellik_>(), a0, a1);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellik_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<float_<A0>,X>))
+                        ((simd_<float_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ellik_(tag::simd_(tag::float_, X),
+                          tag::simd_(tag::float_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
     {
       A0 phi = nt2::abs(a0);
       A0 m = a1;
@@ -83,22 +133,10 @@ namespace nt2 { namespace functors
       }
       A0 temp = (atan(t) + mod * Pi<A0>())/(d * a);
       temp = b_xor(temp, bitofsign(a0));
-      return b_or(b_or(isltz(a1), isgt(a1, One<A0>())), temp);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, double)
-    {
-        A0 r;
-        map(functor<ellik_>(), a0, a1, r);
-        return r;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return nt2::ellik(tofloat(a0), tofloat(a1));
-
+      return b_or(b_or(is_ltz(a1), gt(a1, One<A0>())), temp);
     }
   };
 } }
 
-      
 #endif
+// modified by jt the 05/01/2011

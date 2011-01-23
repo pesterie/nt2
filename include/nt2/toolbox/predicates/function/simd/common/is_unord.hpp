@@ -10,25 +10,30 @@
 #define NT2_TOOLBOX_PREDICATES_FUNCTION_SIMD_COMMON_IS_UNORD_HPP_INCLUDED
 #include <nt2/sdk/meta/strip.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_unord_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<arithmetic_<A0>,X>))
+                           ((simd_<arithmetic_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
 {
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_unord(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Dummy>
-  struct call<is_unord_,
-              tag::simd_(tag::arithmetic_,Extension),Dummy>
+  template<class X, class Dummy>
+  struct call<tag::is_unord_(tag::simd_(tag::arithmetic_, X),
+                             tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0, A0)> : meta::strip<A0>{};
 
-    // see documentation http://nt2.lri.fr/extension/custom_function.html
-    // for writing the functor implementation code 
-    // with or without type dispatching
 
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

@@ -15,58 +15,171 @@
 #include <nt2/sdk/meta/from_bits.hpp>
 #include <nt2/sdk/meta/as_integer.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type8_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<type8_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct call<first_,tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::type8_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct  result<This(A0)>
           : meta::scalar_of<typename meta::strip<A0>::type> {};
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 1
-                              , typename nt2::meta::scalar_of<A0>::type
-                              , ( 6
-                                , (types8_,types16_,float,types32_,double, types64_)
-                                )
-                              )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    types8_)
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
+      typedef typename NT2_RETURN_TYPE(1)::type type;
       int that = _mm_extract_epi16(a0, 0);
       printf("%d\n",that);
       return that & 0xFF;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    types16_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<double_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::double_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct  result<This(A0)>
+          : meta::scalar_of<typename meta::strip<A0>::type> {};
+
+    NT2_FUNCTOR_CALL(1)
     {
-      return _mm_extract_epi16(a0, 0);
+      return _mm_cvtsd_f64(a0);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    float)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<float_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::float_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct  result<This(A0)>
+          : meta::scalar_of<typename meta::strip<A0>::type> {};
+
+    NT2_FUNCTOR_CALL(1)
     {
       typedef typename meta::as_integer<A0>::type type;
       meta::from_bits<float>::type t = {_mm_cvtsi128_si32(simd::native_cast<type>(a0))};
       return t.value;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    types32_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type32_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<type32_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::type32_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct  result<This(A0)>
+          : meta::scalar_of<typename meta::strip<A0>::type> {};
+
+    NT2_FUNCTOR_CALL(1)
     {
       typedef typename meta::as_integer<A0>::type type;
       return _mm_cvtsi128_si32(simd::native_cast<type>(a0));
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    double)
-    {
-      return _mm_cvtsd_f64(a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    types64_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type64_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<type64_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::type64_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct  result<This(A0)>
+          : meta::scalar_of<typename meta::strip<A0>::type> {};
+
+    NT2_FUNCTOR_CALL(1)
     {
       typedef typename meta::as_integer<A0>::type type;
       typedef typename meta::as_real<A0>::type rtype;
       meta::as_bits<double>::type t = {_mm_cvtsd_f64(simd::native_cast<rtype>(a0))};
       return t.bits;
     }
+  };
+} }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is type16_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::first_, tag::cpu_,
+                        (A0),
+                        ((simd_<type16_<A0>,tag::sse_>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::first_(tag::simd_(tag::type16_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct  result<This(A0)>
+          : meta::scalar_of<typename meta::strip<A0>::type> {};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return _mm_extract_epi16(a0, 0);
+    }
   };
 } }
 
 #endif
+// modified by jt the 05/01/2011

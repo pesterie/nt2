@@ -12,19 +12,19 @@
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
 #include <nt2/sdk/functor/meta/call.hpp>
 #include <boost/type_traits/is_same.hpp>
+
 //////////////////////////////////////////////////////////////////////////////
 // Test behavior of arithmetic components using NT2_TEST_CASE
 //////////////////////////////////////////////////////////////////////////////
 NT2_TEST_CASE_TPL(oneplus, NT2_SIMD_SIGNED_TYPES )
 {
  using nt2::oneplus;
- using nt2::functors::oneplus_;    
+ using nt2::tag::oneplus_;    
  using nt2::load; 
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;
@@ -48,7 +48,7 @@ NT2_TEST_CASE_TPL(oneplus, NT2_SIMD_SIGNED_TYPES )
 NT2_TEST_CASE_TPL(unsgned_oneplus, NT2_SIMD_UNSIGNED_TYPES )
 {
  using nt2::oneplus;
- using nt2::functors::oneplus_;    
+ using nt2::tag::oneplus_;    
  using nt2::load; 
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;

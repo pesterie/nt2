@@ -25,58 +25,74 @@
 #include <nt2/include/functions/rec.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nthroot_, tag::cpu_,
+                          (A0)(A1)(X),
+                          ((simd_<arithmetic_<A0>,X>))
+                          ((simd_<integer_<A0>,X>))
+                         );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<nthroot_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
-      boost::mpl::and_<meta::is_real_convertible<A0>,
-		       meta::has_same_size<A0, A1, meta::scalar_of < boost::mpl::_> >, 
-		       meta::is_integral<A1> >{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute nthroot(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<nthroot_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::nthroot_(tag::simd_(tag::arithmetic_, X),
+                            tag::simd_(tag::integer_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
     struct result<This(A0,A1)> :  meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 x =  abs(a0);
-      A0 aa1 = tofloat(a1);
-      A0 y =nt2::pow(x,rec(aa1));
-      y = seladd(isnez(y), y, - (powi(y, a1) - x)/(aa1* powi(y, sub(a1, One<A1>()))));
-      // Correct numerical errors (since, e.g., 64^(1/3) is not exactly 4)
-      // by one iteration of Newton's method
-      return  b_and(isnez(a0),
-		    sel(iseq(a1, One<A1>()),
-			a0,
-			sel(b_and(iseven(a1), isltz(a0)),
-			    Nan<A0>(),
-			    y)
-			)
-		    );
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type type; 
+      typedef typename NT2_RETURN_TYPE(2)::type type;
       return nt2::nthroot(tofloat(a0), a1);
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nthroot_, tag::cpu_,
+                          (A0)(A1)(X),
+                          ((simd_<real_<A0>,X>))
+                          ((simd_<integer_<A1>,X>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::nthroot_(tag::simd_(tag::real_, X),
+                            tag::simd_(tag::integer_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      A0 x =  abs(a0);
+      A0 aa1 = tofloat(a1);
+      A0 y =nt2::pow(x,rec(aa1));
+      y = seladd(is_nez(y), y, - (powi(y, a1) - x)/(aa1* powi(y, sub(a1, One<A1>()))));
+      // Correct numerical errors (since, e.g., 64^(1/3) is not exactly 4)
+      // by one iteration of Newton's method
+      return  b_and(is_nez(a0),
+                sel(is_equal(a1, One<A1>()),
+                  a0,
+                  sel(b_and(is_even(a1), is_ltz(a0)),
+                      Nan<A0>(),
+                      y)
+                  )
+                );
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

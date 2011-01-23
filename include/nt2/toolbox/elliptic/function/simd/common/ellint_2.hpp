@@ -20,78 +20,109 @@
 #include <nt2/include/functions/tofloat.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellint_2_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<arithmetic_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<ellint_2_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> :
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute ellint_2(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<ellint_2_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::ellint_2_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> :  meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (float,double,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       float)
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::scalar_of<A0>::type sA0;
-      A0 x = nt2::abs(a0);
-      const A0 a = nt2::sqrt(oneminus(x));
-      const A0 z = horner< NT2_HORNER_COEFF_T(sA0, 11,
-				      (0x392102f5,
-				       0x3b246c1b,
-				       0x3c0e578f,
-				       0x3c2fe240,
-				       0x3bfebca9,
-				       0x3bf882cf,
-				       0x3c3d8b3f,
-				       0x3cb2d89a,
-				       0x3d68ac90,
-				       0x3ee2e430,
-				       0x3f800000) ) > (a)
-       	    -nt2::log(a)*a*horner< NT2_HORNER_COEFF_T(sA0, 10,
-					      (0x38098de4,
-					       0x3a84557e,
-					       0x3bd53114,
-					       0x3c8a54f6,
-					       0x3cd67118,
-					       0x3d0925e1,
-					       0x3d2ef92b,
-					       0x3d6fffe9,
-					       0x3dc00000,
-					       0x3e800000
-					       ) ) > (a);
-      return is_gt(x,One<A0>())|z;
-     }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1, double)
-    {
-	A0 r;
-	map(functor<ellint_2_>(), a0, r);
-	return r;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
+      typedef typename NT2_RETURN_TYPE(1)::type type;
       return nt2::ellint_2(tofloat(a0));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellint_2_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<double_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ellint_2_(tag::simd_(tag::double_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return map(functor<tag::ellint_2_>(), a0);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ellint_2_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<float_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ellint_2_(tag::simd_(tag::float_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename meta::scalar_of<A0>::type sA0;
+      A0 x = nt2::abs(a0);
+      const A0 a = nt2::sqrt(oneminus(x));
+      const A0 z = horner< NT2_HORNER_COEFF_T(sA0, 11,
+                              (0x392102f5,
+                               0x3b246c1b,
+                               0x3c0e578f,
+                               0x3c2fe240,
+                               0x3bfebca9,
+                               0x3bf882cf,
+                               0x3c3d8b3f,
+                               0x3cb2d89a,
+                               0x3d68ac90,
+                               0x3ee2e430,
+                               0x3f800000) ) > (a)
+                -nt2::log(a)*a*horner< NT2_HORNER_COEFF_T(sA0, 10,
+                                    (0x38098de4,
+                                     0x3a84557e,
+                                     0x3bd53114,
+                                     0x3c8a54f6,
+                                     0x3cd67118,
+                                     0x3d0925e1,
+                                     0x3d2ef92b,
+                                     0x3d6fffe9,
+                                     0x3dc00000,
+                                     0x3e800000
+                                     ) ) > (a);
+      return gt(x,One<A0>())|z;
+     }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

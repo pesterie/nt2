@@ -13,36 +13,53 @@
 
 #include <nt2/include/functions/abs.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_inf_, tag::cpu_,
+                        (A0),
+                        (fundamental_<A0>)
+                       )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for is_inf
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_inf(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<is_inf_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::is_inf_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
-    typedef bool result_type; 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (real_,fundamental_))
-    )
+    typedef bool result_type;
 
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-       return nt2::abs(a0) == Inf<A0>();
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, fundamental_)
-    {
-      details::ignore_unused(a0); 
-      return false; 
+      details::ignore_unused(a0);
+      return false;
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_inf_, tag::cpu_,
+                        (A0),
+                        (real_<A0>)
+                       )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_inf_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    typedef bool result_type;
+
+    NT2_FUNCTOR_CALL(1)
+    {
+       return nt2::abs(a0) == Inf<A0>();
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

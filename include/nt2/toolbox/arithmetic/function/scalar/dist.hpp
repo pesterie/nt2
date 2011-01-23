@@ -11,46 +11,84 @@
 
 #include <nt2/include/functions/logical_xor.hpp>
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<dist_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef boost::mpl::true_ result_type;
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute dist(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<dist_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::dist_, tag::cpu_,
+                      (A0)(A1),
+                      (arithmetic_<A0>)(arithmetic_<A1>)
+                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::dist_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (3, (bool_, real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-       return abs(a0-a1);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
         return (a0>a1) ? a0-a1 : a1-a0;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, bool_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is bool_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::dist_, tag::cpu_,
+                      (A0)(A1),
+                      (bool_<A0>)(bool_<A1>)
+                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::dist_(tag::bool_,tag::bool_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
     {
       return logical_xor(a0, a1);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::dist_, tag::cpu_,
+                      (A0)(A1),
+                      (real_<A0>)(real_<A1>)
+                     )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::dist_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+       return abs(a0-a1);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

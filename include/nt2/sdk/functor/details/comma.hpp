@@ -16,26 +16,25 @@
 #include <nt2/sdk/details/ignore_unused.hpp>
 #include <nt2/sdk/functor/preprocessor/call.hpp>
 
-namespace nt2 { namespace functors
-{
-  //////////////////////////////////////////////////////////////////////////////
-  // Whatever the typs, we can always do x,y
-  //////////////////////////////////////////////////////////////////////////////
-  template<class Category, class Info>
-  struct validate<comma_,Category, Info>
-  {
-    typedef boost::mpl::true_ result_type;
-  };
+NT2_REGISTER_DISPATCH ( tag::comma_,tag::cpu_
+                      , (A0)(A1)
+                      , (unspecified_<A0>)(unspecified_<A1>)
+                      );
 
+namespace nt2 { namespace ext
+{
   //////////////////////////////////////////////////////////////////////////////
   // Comma basically evaluates its arguments and returns the second one
   //////////////////////////////////////////////////////////////////////////////
-  template<class Category, class Info>
-  struct call<comma_,Category, Info>
+  template<class Dummy>
+  struct  call< tag::comma_(tag::unspecified_,tag::unspecified_)
+              , tag::cpu_, Dummy
+              >
+        : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> { typedef A1 type; };
+    struct result<This(A0,A1)> : meta::strip<A1> {};
 
     NT2_FUNCTOR_CALL(2) { details::ignore_unused(a0); return a1; }
   };

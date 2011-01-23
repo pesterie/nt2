@@ -10,73 +10,91 @@
 #define NT2_SDK_MEMORY_DETAILS_TIMES_HPP_INCLUDED
 
 ////////////////////////////////////////////////////////////////////////////////
-// CT/RT hybrid times functor
+// Activates operator * on mpl integral with integral
 ////////////////////////////////////////////////////////////////////////////////
 #include <boost/mpl/times.hpp>
+#include <nt2/sdk/meta/mpl.hpp>
+#include <nt2/sdk/meta/strip.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/tr1/functional.hpp>
-#include <boost/type_traits/remove_reference.hpp>
+#include <nt2/sdk/functor/operators.hpp>
 #include <nt2/sdk/functor/preprocessor/call.hpp>
 
-namespace nt2 { namespace details
+////////////////////////////////////////////////////////////////////////////////
+// Make nultiplies works with mpl::integral types
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::multiplies_ , tag::cpu_
+                      , (A0)(A1)
+                      , (mpl_integral_< integer_<A0> >)(integer_<A1>)
+                      )
+
+NT2_REGISTER_DISPATCH ( tag::multiplies_ , tag::cpu_
+                      , (A0)(A1)
+                      , (integer_<A0>)(mpl_integral_< integer_<A1> >)
+                      )
+
+NT2_REGISTER_DISPATCH ( tag::multiplies_ , tag::cpu_
+                      , (A0)(A1)
+                      , (mpl_integral_< integer_<A0> >)
+                        (mpl_integral_< integer_<A1> >)
+                      )
+
+namespace nt2 { namespace ext
 {
-  struct times
+  template<class Dummy>
+  struct  call< tag::multiplies_(tag::mpl_integral_(tag::integer_),tag::integer_)
+              , tag::cpu_, Dummy
+              > : callable
   {
     template<class Sig> struct result;
-
-    template<class This, class A, class B>
-    struct result<This(A const&,B const&)>
+    template<class This,class A0, class A1>  struct
+    result<This(A0,A1)>
     {
-      template<bool As, bool Bs, int Dummy = 0 >
-      struct inner
-	  {
-        BOOST_TYPEOF_NESTED_TYPEDEF_TPL(nested, A() * B() );
-        typedef typename nested::type type;
-      };
-
-      template<int Dummy>
-      struct inner<false,false,Dummy>
-      {
-        typedef typename boost::mpl::times<A,B>::type type;
-      };
-
-      typedef typename inner< boost::is_arithmetic<A>::value
-                                  , boost::is_arithmetic<B>::value
-                                  >::type type;
+      static A1 a1;
+      typedef typename meta::strip<A0>::type arg0;
+      BOOST_TYPEOF_NESTED_TYPEDEF_TPL(nested,arg0::value*a1)
+      typedef typename nested::type type;
     };
 
-    template<bool A0, bool A1> struct status {};
+    NT2_FUNCTOR_CALL(2) { return A0::value*a1; }
+  };
 
-    NT2_FUNCTOR_DISPATCH ( 2, (status < boost::is_arithmetic<A0>::value
-                                      , boost::is_arithmetic<A1>::value>
-                              )
-                          , ( 4,( (status<true  , true> )
-                                , (status<true  , false>)
-                                , (status<false , true> )
-                                , (status<false , false>)
+  template<class Dummy>
+  struct  call< tag::multiplies_(tag::integer_,tag::mpl_integral_(tag::integer_))
+              , tag::cpu_, Dummy
+              > : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>  struct
+    result<This(A0,A1)>
+    {
+      static A0 a0;
+      typedef typename meta::strip<A1>::type arg1;
+      BOOST_TYPEOF_NESTED_TYPEDEF_TPL(nested,arg1::value*a0)
+      typedef typename nested::type type;
+    };
+
+    NT2_FUNCTOR_CALL(2) { return a0*A1::value; }
+  };
+
+  template<class Dummy>
+  struct  call< tag::multiplies_( tag::mpl_integral_(tag::integer_)
+                                , tag::mpl_integral_(tag::integer_)
                                 )
-                            )
-                          , times
-                          )
+              , tag::cpu_, Dummy
+              > : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>
+    struct  result<This(A0,A1)>
+          : boost::mpl::times < typename meta::strip<A0>::type
+                              , typename meta::strip<A1>::type
+                              >
+    {};
 
-    NT2_FUNCTOR_EVAL_IF(2, (status<true,true>), times)
+    NT2_FUNCTOR_CALL(2)
     {
-      return a0*a1;
-    }
-
-    NT2_FUNCTOR_EVAL_IF(2, (status<false,false>), times)
-    {
-      return typename NT2_RETURN_TYPE(2,times)::type();
-    }
-
-    NT2_FUNCTOR_EVAL_IF(2, (status<false,true>) , times)
-    {
-      return A0::value * a1;
-    }
-
-    NT2_FUNCTOR_EVAL_IF(2, (status<true,false>) , times)
-    {
-      return a0 * A1::value;
+      return typename NT2_RETURN_TYPE(2)::type();
     }
   };
 } }

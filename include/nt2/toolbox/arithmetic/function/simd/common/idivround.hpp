@@ -18,53 +18,146 @@
 #include <nt2/include/functions/tofloat.hpp>
 
 
-namespace nt2 { namespace functors
-{
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute idivround(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<idivround_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivround_, tag::cpu_,
+                            (A0)(X),
+                            ((simd_<arithmetic_<A0>,X>))
+                            ((simd_<arithmetic_<A0>,X>))
+                           );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::idivround_(tag::simd_(tag::arithmetic_, X),
+                              tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)>  : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (5, (real_,unsigned_,int8_t,int16_t, arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_){ return round2even(a0/a1);     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,   unsigned_){ return rdivide(a0+a1/Two<A0>(), a1);  }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_){ return iround(tofloat(a0)/tofloat(a1));}
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       int16_t)
-    {
-      typedef typename meta::scalar_of<A0>::type           stype;
-      typedef typename meta::upgrade<stype>::type itype;
-      typedef typename simd::native<itype,Extension>                 ivtype;
-      ivtype a0l, a0h, a1l, a1h;
-      boost::fusion::tie(a0l, a0h) = split(a0);
-      boost::fusion::tie(a1l, a1h) = split(a1);
-      return simd::native_cast<A0>(group(idivround(a0l, a1l),
-					 idivround(a0h, a1h)));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       int8_t)
-    {
-      typedef typename meta::scalar_of<A0>::type           stype;
-      typedef typename meta::upgrade<stype>::type itype;
-      typedef typename simd::native<itype, Extension>                 ivtype;
-      ivtype a0l, a0h, a1l, a1h;
-      boost::fusion::tie(a0l, a0h) = split(a0);
-      boost::fusion::tie(a1l, a1h) = split(a1);
-      return simd::native_cast<A0>(group(idivround(a0l, a1l),
-					 idivround(a0h, a1h) ));
-    }
-
+    NT2_FUNCTOR_CALL(2){ return iround(tofloat(a0)/tofloat(a1)); }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivround_, tag::cpu_,
+                            (A0)(X),
+                            ((simd_<unsigned_<A0>,X>))
+                            ((simd_<unsigned_<A0>,X>))
+                           );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::idivround_(tag::simd_(tag::unsigned_, X),
+                              tag::simd_(tag::unsigned_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>  : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2){ return rdivide(a0+a1/Two<A0>(), a1); }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int16_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivround_, tag::cpu_,
+                            (A0)(X),
+                            ((simd_<int16_<A0>,X>))
+                            ((simd_<int16_<A0>,X>))
+                           );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::idivround_(tag::simd_(tag::int16_, X),
+                              tag::simd_(tag::int16_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>  : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename meta::scalar_of<A0>::type           stype;
+      typedef typename meta::upgrade<stype>::type itype;
+      typedef typename simd::native<itype,X>                 ivtype;
+      ivtype a0l, a0h, a1l, a1h;
+      boost::fusion::tie(a0l, a0h) = split(a0);
+      boost::fusion::tie(a1l, a1h) = split(a1);
+      return simd::native_cast<A0>(group(idivround(a0l, a1l),
+                               idivround(a0h, a1h)));
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int8_t
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivround_, tag::cpu_,
+                            (A0)(X),
+                            ((simd_<int8_<A0>,X>))
+                            ((simd_<int8_<A0>,X>))
+                           );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::idivround_(tag::simd_(tag::int8_, X),
+                              tag::simd_(tag::int8_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>  : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename meta::scalar_of<A0>::type           stype;
+      typedef typename meta::upgrade<stype>::type itype;
+      typedef typename simd::native<itype, X>                 ivtype;
+      ivtype a0l, a0h, a1l, a1h;
+      boost::fusion::tie(a0l, a0h) = split(a0);
+      boost::fusion::tie(a1l, a1h) = split(a1);
+      return simd::native_cast<A0>(group(idivround(a0l, a1l),
+                               idivround(a0h, a1h) ));
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivround_, tag::cpu_,
+                            (A0)(X),
+                            ((simd_<real_<A0>,X>))
+                            ((simd_<real_<A0>,X>))
+                           );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::idivround_(tag::simd_(tag::real_, X),
+                              tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>  : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2){ return round2even(a0/a1); }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

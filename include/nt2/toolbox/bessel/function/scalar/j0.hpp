@@ -18,38 +18,89 @@
 #include <nt2/include/functions/cos.hpp>
 #include <nt2/include/functions/is_inf.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::j0_, tag::cpu_,
+                    (A0),
+                    (arithmetic_<A0>)
+                   )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for j0
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute j0(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<j0_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::j0_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> :
       boost::result_of<meta::floating(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (3, (float,double,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  float)
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::scalar_of<A0>::type stype; 
-      if (is_inf(a0)) return Zero<A0>(); 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return nt2::j0(type(a0));
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::j0_, tag::cpu_,
+                    (A0),
+                    (double_<A0>)
+                   )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::j0_(tag::double_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(1) {
+      if (is_inf(a0)) return Zero<A0>();
+      return ::j0(a0);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::j0_, tag::cpu_,
+                    (A0),
+                    (float_<A0>)
+                   )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::j0_(tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename meta::scalar_of<A0>::type stype;
+      if (is_inf(a0)) return Zero<A0>();
       A0 x = nt2::abs(a0);
       if (x < 1.0e-3f) return oneminus(Quarter<A0>()*sqr(x));
       if (x <= Two<A0>())
         {
           A0 z = sqr(x);
-          return (z-integral_constant<float,0x40b90fdc> ())*
+          return (z-single_constant<float,0x40b90fdc> ())*
             horner< NT2_HORNER_COEFF_T(stype, 5,
                    (0xb382511c,
               0x36d660a0,
@@ -83,20 +134,8 @@ namespace nt2 { namespace functors
                 ) ) > (sqr(q))-Pio_4<A0>();
       return p3*nt2::cos(xn+x);
     }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1, double) {
-      if (is_inf(a0)) return Zero<A0>(); 
-      return ::j0(a0);
-    }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return nt2::j0(type(a0));
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

@@ -1,13 +1,15 @@
-/*******************************************************************************
- *         Copyright 2003 & onward LASMEA UMR 6602 CNRS/U.B.P
- *         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
- *
- *          Distributed under the Boost Software License, Version 1.0.
- *                 See accompanying file LICENSE.txt or copy at
- *                     http://www.boost.org/LICENSE_1_0.txt
- ******************************************************************************/
-#ifndef NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_LOGS_D_LOG_HPP_INCLUDED
-#define NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_LOGS_D_LOG_HPP_INCLUDED
+//////////////////////////////////////////////////////////////////////////////
+///   Copyright 2003 and onward LASMEA UMR 6602 CNRS/U.B.P Clermont-Ferrand
+///   Copyright 2009 and onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+///
+///          Distributed under the Boost Software License, Version 1.0
+///                 See accompanying file LICENSE.txt or copy at
+///                     http://www.boost.org/LICENSE_1_0.txt
+//////////////////////////////////////////////////////////////////////////////
+#ifndef NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_LOGS_D_LOG_HPP_INCLUDED
+#define NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_LOGS_D_LOG_HPP_INCLUDED
+
+#include <boost/fusion/include/vector_tie.hpp>
 #include <nt2/include/functions/sqr.hpp>
 #include <nt2/include/functions/tofloat.hpp>
 #include <nt2/include/functions/is_nan.hpp>
@@ -44,7 +46,7 @@ namespace nt2
 	  typedef typename meta::scalar_of<A0>::type               sA0;
 	  A0 x;
 	  int_type k;
-	  boost::fusion::tie(x, k) = fast_frexp(a0);
+	  boost::fusion::vector_tie(x, k) = fast_frexp(a0);
 	  const int_type x_lt_sqrthf = -isgt(Sqrt_2o_2<A0>(), x);
 	  k += x_lt_sqrthf;
 	  f = minusone(x+b_and(x, genmask<A0>(x_lt_sqrthf)));
@@ -76,8 +78,8 @@ namespace nt2
 	  if (nt2::is_nan(a0)||is_ltz(a0)) return Nan<A0>();
 	  A0 dk, hfsq, s, R, f;
 	  kernel_log(a0, dk, hfsq, s, R, f);
-	  return  mul(dk, integral_constant<A0, 0x3fe62e42fee00000ll>())-
-	    ((hfsq-(s*(hfsq+R)+mul(dk,integral_constant<A0, 0x3dea39ef35793c76ll>())))-f);
+	  return  mul(dk, double_constant<A0, 0x3fe62e42fee00000ll>())-
+	    ((hfsq-(s*(hfsq+R)+mul(dk,double_constant<A0, 0x3dea39ef35793c76ll>())))-f);
 	}
 	inline A0 log2(const  A0& a0)
 	{

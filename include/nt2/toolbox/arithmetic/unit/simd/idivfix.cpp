@@ -7,16 +7,17 @@
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
 #define NT2_UNIT_MODULE "nt2 arithmetic toolbox - unit/simd Mode"
+
 #include <nt2/toolbox/arithmetic/include/idivfix.hpp> 
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
 #include <nt2/sdk/functor/meta/call.hpp>
 #include <boost/type_traits/is_same.hpp>
+
 //////////////////////////////////////////////////////////////////////////////
 // Test behavior of arithmetic components using NT2_TEST_CASE
 //////////////////////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@
 NT2_TEST_CASE_TPL(idivfix,  NT2_SIMD_TYPES  )
 {
  using nt2::idivfix;
- using nt2::functors::idivfix_;    
+ using nt2::tag::idivfix_;    
  using nt2::load;  
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;
@@ -40,7 +41,7 @@ NT2_TEST_CASE_TPL(idivfix,  NT2_SIMD_TYPES  )
  }
    n_t a0 = load<n_t>(&data[0],0);   
    n_t a1 = load<n_t>(&data[0],1); 
-   n_t v  = idivfix(a0, a1);  
+   n_t v = idivfix(a0, a1);  
    for(std::size_t j=0;j<cardinal_of<n_t>::value;++j) 
      {
        NT2_TEST_EQUAL( v[j], idivfix(a0[j], a1[j]) );

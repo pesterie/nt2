@@ -11,7 +11,6 @@
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
@@ -25,7 +24,7 @@
 NT2_TEST_CASE_TPL(iround, NT2_SIMD_TYPES )
 {
  using nt2::iround;
- using nt2::functors::iround_;    
+ using nt2::tag::iround_;    
  using nt2::load; 
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;
@@ -41,7 +40,7 @@ NT2_TEST_CASE_TPL(iround, NT2_SIMD_TYPES )
     data[i] = i; // good value here for iround
   }
  n_t a0 = load<n_t>(&data[0],0); 
- in_t v  = iround(a0);
+ in_t v = iround(a0);
  for(std::size_t j=0;j<cardinal_of<n_t>::value;++j)
    {
      NT2_TEST_EQUAL( v[j], iround(a0[j]) );

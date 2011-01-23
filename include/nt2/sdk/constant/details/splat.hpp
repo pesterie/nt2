@@ -12,19 +12,33 @@
 ////////////////////////////////////////////////////////////////////////////////
 // splat for scalar types
 ////////////////////////////////////////////////////////////////////////////////
-#include <nt2/sdk/functor/category.hpp>
+#include <nt2/sdk/meta/as.hpp>
 #include <nt2/sdk/functor/preprocessor/call.hpp>
 
-namespace nt2 { namespace functors
-{
-  template<class T, class Category, class Info>
-  struct call<splat_<T>,tag::scalar_(Category), Info>
-  {
-    typedef T result_type;
+NT2_REGISTER_DISPATCH ( tag::splat_
+                      , tag::cpu_
+                      , (A0)(A1)
+                      , (fundamental_<A0>)(target_< fundamental_<A1> >)
+                      );
 
-    NT2_FUNCTOR_CALL(1)
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct  call< tag::splat_(tag::fundamental_,tag::target_(tag::fundamental_))
+              , tag::cpu_
+              , Dummy
+              >
+        : callable
+  {
+    template<class Sig> struct result;
+
+    template<class This,class A0, class Target>
+    struct result<This(A0,Target)> : meta::strip<Target>::type {};
+
+    NT2_FUNCTOR_CALL(2)
     {
-      T that = static_cast<T>(a0);
+      typedef typename NT2_RETURN_TYPE(2)::type result_type;
+      result_type that = static_cast<result_type>(a0);
       return that;
     }
   };

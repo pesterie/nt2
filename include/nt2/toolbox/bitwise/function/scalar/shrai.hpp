@@ -12,48 +12,60 @@
 #include <nt2/sdk/meta/as_bits.hpp>
 
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<shrai_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> :
-      boost::is_integral<typename meta::strip<A1>::type >{}; 
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute shrai(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<shrai_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shrai_, tag::cpu_,
+                       (A0)(A1),
+                       (arithmetic_<A0>)(arithmetic_<A1>)
+                      )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::shrai_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
        struct result<This(A0,A1)> : meta::strip <A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (2, (real_,arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename meta::as_integer<A0,signed>::type type;
+      return type(a0) >> a1;
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::shrai_, tag::cpu_,
+                       (A0)(A1),
+                       (real_<A0>)(real_<A1>)
+                      )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::shrai_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+       struct result<This(A0,A1)> : meta::strip <A0>{};
+
+    NT2_FUNCTOR_CALL(2)
     {
       typedef typename meta::as_bits<A0, signed>::type type;
       type that = {a0};
       that.bits >>= a1;
       return that.value;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
-    {
-      typedef typename meta::as_integer<A0,signed>::type type;     
-      return type(a0) >> a1;
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

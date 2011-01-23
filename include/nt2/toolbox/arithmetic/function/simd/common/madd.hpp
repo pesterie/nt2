@@ -11,16 +11,24 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for madd
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute madd(const A0& a0, const A0& a1, const A0& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<madd_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::madd_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<arithmetic_<A0>,X>))
+                       ((simd_<arithmetic_<A0>,X>))
+                       ((simd_<arithmetic_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::madd_(tag::simd_(tag::arithmetic_, X),
+                         tag::simd_(tag::arithmetic_, X),
+                         tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -31,8 +39,9 @@ namespace nt2 { namespace functors
     {
         return a0*a1+a2;
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

@@ -10,6 +10,7 @@
 #define NT2_SDK_SIMD_DETAILS_IMPL_SPLAT_HPP_INCLUDED
 
 #include <nt2/sdk/simd/preprocessor/include.hpp>
+
 #include NT2_SIMD_INCLUDE(splat.hpp)
 
 #endif

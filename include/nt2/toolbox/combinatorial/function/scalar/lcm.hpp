@@ -14,39 +14,58 @@
 #include <nt2/include/functions/gcd.hpp>
 #include <nt2/include/functions/trunc.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::lcm_, tag::cpu_,
+                     (A0)(A1),
+                     (integer_<A0>)(integer_<A1>)
+                    )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for lcm
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute lcm(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<lcm_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::lcm_(tag::integer_,tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-      return nt2::abs(trunc(a0)*rdiv(a1,gcd(a0,a1)));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
      return nt2::abs(a0*rdivide(a1,gcd(a0,a1)));
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::lcm_, tag::cpu_,
+                     (A0)(A1),
+                     (real_<A0>)(real_<A1>)
+                    )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::lcm_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return nt2::abs(trunc(a0)*rdiv(a1,gcd(a0,a1)));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

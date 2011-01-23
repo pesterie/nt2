@@ -9,58 +9,73 @@
 #ifndef NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_NTHROOT_HPP_INCLUDED
 #define NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_NTHROOT_HPP_INCLUDED
 #include <nt2/sdk/constant/digits.hpp>
-
 #include <nt2/include/functions/signnz.hpp>
 #include <nt2/include/functions/pow.hpp>
 #include <nt2/include/functions/abs.hpp>
 #include <nt2/include/functions/minusone.hpp>
 #include <nt2/include/functions/rec.hpp>
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<nthroot_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nthroot_, tag::cpu_,
+                         (A0)(A1),
+                         (arithmetic_<A0>)(arithmetic_<A1>)
+                        )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::nthroot_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : boost::is_integral<A1>{};
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return nt2::nthroot(type(a0),a1);
+    }
   };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute nthroot(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<nthroot_,tag::scalar_(tag::arithmetic_),Info>
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nthroot_, tag::cpu_,
+                         (A0)(A1),
+                         (real_<A0>)(integer_<A1>)
+                        )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::nthroot_(tag::real_,tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
     struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
       typedef typename boost::result_of<meta::floating(A0)>::type type;
-      if (!a1) return One<type>(); 
-      type y = signnz(a0)*nt2::pow(nt2::abs(a0),rec(type(a1)));
+      if (!a1) return One<type>();
+      type a1b = a1;
+      type y = signnz(a0)*nt2::pow(nt2::abs(a0),rec(a1b));
       // Correct numerical errors (since, e.g., 64^(1/3) is not exactly 4)
       // by one iteration of Newton's method
-      if (a0) y -= (nt2::pow(y, a1) - a0) / (a1* nt2::pow(y,minusone(a1)));
+      if (a0) y -= (nt2::pow(y, a1b) - a0) / (a1* nt2::pow(y,minusone(a1b)));
       return y;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return nt2::nthroot(type(a0),a1);
     }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010
+// modified manually by jt the 26/12/2010

@@ -11,49 +11,64 @@
 #include <nt2/sdk/meta/size.hpp>
 #include <nt2/sdk/constant/properties.hpp>
 #include <nt2/sdk/meta/strip.hpp>
+#include <nt2/sdk/meta/is_signed.hpp>
 #include <nt2/include/functions/shli.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negif_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                        ((simd_<arithmetic_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
 {
-//   template<class Extension,class Info>
-//   struct validate<negif_,tag::simd_(tag::arithmetic_,Extension),Info>
-//   {
-//     template<class Sig> struct result;
-//     template<class This,class A0, class A1>
-//     struct result<This(A0,A1)> : 
-//       meta::has_same_size<A0,A1>{};
-//   };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute negif(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<negif_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::negif_(tag::simd_(tag::arithmetic_, X),
+                          tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0, class A1>
-    struct result<This(A0, A1)>
-      { typedef A1 type; };
+      struct result<This(A0, A1)>: meta::strip<A1>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
-      return b_xor(a1, b_and(a0, Signmask<A0>())); 
+      return a1 - shli(b_and(a1, a0), 1);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       arithmetic_)
-    {
-      return a1 - shli(b_and(a1, a0), 1); 
-    }
-
-    
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negif_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<real_<A0>,X>))
+                        ((simd_<real_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::negif_(tag::simd_(tag::real_, X),
+                          tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>
+      struct result<This(A0, A1)>: meta::strip<A1>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return b_xor(a1, b_and(a0, Signmask<A0>()));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

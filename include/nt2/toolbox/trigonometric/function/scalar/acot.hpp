@@ -10,52 +10,94 @@
 #define NT2_TOOLBOX_TRIGONOMETRIC_FUNCTION_SCALAR_ACOT_HPP_INCLUDED
 #include <nt2/sdk/constant/real.hpp>
 #include <nt2/sdk/constant/digits.hpp>
-
+#include <nt2/sdk/constant/infinites.hpp>
 #include <nt2/include/functions/atan.hpp>
+#include <nt2/include/functions/rec.hpp>
+#include <nt2/include/functions/bitofsign.hpp>
+#include <nt2/include/functions/is_inf.hpp>
+#include <iostream>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::acot_, tag::cpu_,
+                      (A0),
+                      (arithmetic_<A0>)
+                     )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for acot
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute acot(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<acot_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::acot_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
       template<class Sig> struct result;
       template<class This,class A0>
       struct result<This(A0)> : boost::result_of<meta::floating(A0)>{};
 
-      NT2_FUNCTOR_CALL_DISPATCH ( 1,
-                                  A0,
-                                  (3, (float,double,arithmetic_))
-                                )
-
-      NT2_FUNCTOR_CALL_EVAL_IF(1,  float)
+    NT2_FUNCTOR_CALL(1)
       {
-	bool iinf = isinf(a0); 
-	if(a0 < 0 && iinf) return Pi<A0>();
-	if(iinf) return Zero<A0>();
-	return Pio_2<A0>()-nt2::atan(a0);
-      }
-
-      NT2_FUNCTOR_CALL_EVAL_IF(1, double)
-      {
-	if(a0 < 0 && isinf(a0)) return Pi<A0>(); 
-        //                                 6.123233995736765886130E-17
-        return (Pio_2<A0>()-nt2::atan(a0))+integral_constant<A0,0x3c91a62633145c07ll>();
-      }
-
-      NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-      {
-	typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
         return nt2::acot(type(a0));
       }
-     };
+  };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::acot_, tag::cpu_,
+                      (A0),
+                      (double_<A0>)
+                     )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::acot_(tag::double_),
+              tag::cpu_, Dummy> : callable
+  {
+      template<class Sig> struct result;
+      template<class This,class A0>
+      struct result<This(A0)> : boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+      {
+      if(!a0)  return b_or(Inf<A0>(), bitofsign(a0));;
+      if(is_inf(a0)) return b_or(Zero<A0>(), bitofsign(a0));
+        //                                 6.123233995736765886130E-17
+        return  b_or((Pio_2<A0>()-nt2::atan(abs(a0)))+double_constant<A0,0x3c91a62633145c07ll>(), bitofsign(a0));
+      }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::acot_, tag::cpu_,
+                      (A0),
+                      (float_<A0>)
+                     )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::acot_(tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+      template<class Sig> struct result;
+      template<class This,class A0>
+      struct result<This(A0)> : boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+      {
+      if(!a0)  return b_or(Inf<A0>(), bitofsign(a0));;
+      if(is_inf(a0)) return b_or(Zero<A0>(), bitofsign(a0));
+      return b_or(Pio_2<A0>()-nt2::atan(abs(a0)), bitofsign(a0));
+      }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

@@ -20,15 +20,8 @@
 #include <nt2/sdk/config/os.hpp>
 #include <nt2/sdk/config/arch.hpp>
 #include <nt2/sdk/config/compiler.hpp>
-#include <nt2/sdk/config/software.hpp>
 #include <nt2/sdk/config/attributes.hpp>
-
-////////////////////////////////////////////////////////////////////////////////
-// Internal NT2 configuration files
-////////////////////////////////////////////////////////////////////////////////
-//#include <nt2/sdk/simd/config.hpp>
-#include <nt2/sdk/memory/config.hpp>
-#include <nt2/sdk/error/config.hpp>
+#include <nt2/sdk/config/type_lists.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 // External NT2 configuration files

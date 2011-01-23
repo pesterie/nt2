@@ -13,39 +13,62 @@
 #include <nt2/include/functions/toint.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for cnp
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute cnp(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<cnp_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::cnp_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<arithmetic_<A0>,X>))
+                      ((simd_<arithmetic_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::cnp_(tag::simd_(tag::arithmetic_, X),
+                        tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
-    {
-	A0 r; 
-	map(functor<cnp_>(), a0, a1, r);
-	return r; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
       return simd::native_cast<A0>(toint(cnp(tofloat(a0),tofloat(a1))));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::cnp_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<real_<A0>,X>))
+                      ((simd_<real_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::cnp_(tag::simd_(tag::real_, X),
+                        tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return map(functor<tag::cnp_>(), a0, a1);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

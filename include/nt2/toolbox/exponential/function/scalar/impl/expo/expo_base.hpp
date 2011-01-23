@@ -1,13 +1,13 @@
-/*******************************************************************************
- *         Copyright 2003 & onward LASMEA UMR 6602 CNRS/U.B.P
- *         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
- *
- *          Distributed under the Boost Software License, Version 1.0.
- *                 See accompanying file LICENSE.txt or copy at
- *                     http://www.boost.org/LICENSE_1_0.txt
- ******************************************************************************/
-#ifndef NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_EXPO_EXPO_BASE_HPP_INCLUDED
-#define NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_EXPO_EXPO_BASE_HPP_INCLUDED
+//////////////////////////////////////////////////////////////////////////////
+///   Copyright 2003 and onward LASMEA UMR 6602 CNRS/U.B.P Clermont-Ferrand
+///   Copyright 2009 and onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+///
+///          Distributed under the Boost Software License, Version 1.0
+///                 See accompanying file LICENSE.txt or copy at
+///                     http://www.boost.org/LICENSE_1_0.txt
+//////////////////////////////////////////////////////////////////////////////
+#ifndef NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_EXPO_EXPO_BASE_HPP_INCLUDED
+#define NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_EXPO_EXPO_BASE_HPP_INCLUDED
 #include <nt2/sdk/constant/infinites.hpp>
 #include <nt2/sdk/constant/digits.hpp>
 
@@ -35,7 +35,7 @@ namespace nt2
 	{
  	  if (reduc_t::isgemaxlog(a0)) return Inf<A0>();
  	  if (reduc_t::isleminlog(a0)) return Zero<A0>();
- 	  if (isnan(a0)) return a0; 
+ 	  if (is_nan(a0)) return a0; 
 	  A0 hi, lo, x; 
 	  A0 k = reduc_t::reduce(a0, hi, lo, x);
 	  A0 c = reduc_t::approx(x);

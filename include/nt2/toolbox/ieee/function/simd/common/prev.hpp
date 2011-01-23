@@ -21,44 +21,64 @@
 #include <nt2/include/functions/next.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for prev
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute prev(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<prev_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::prev_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<arithmetic_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::prev_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      return -next(-a0); 
-//       typedef typename meta::as_integer<A0, signed>::type itype; 
-//       A0 m;
-//       itype expon;
-//       boost::fusion::tie(m, expon) = fast_frexp(a0);
-//       expon =  seladd(iseq(m, Mhalf<A0>()), expon, Mone<itype>()); 
-//       A0 diff =  fast_ldexp(Mone<A0>(), expon-Nbdigits<A0>());
-//       diff = sel(iseqz(diff)||iseqz(a0),  Mindenormal<A0>(), diff);
-//       return a0+diff; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    arithmetic_)
-    {
-      return a0-One<A0>(); 
+      return a0-One<A0>();
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::prev_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<real_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::prev_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return -next(-a0);
+//       typedef typename meta::as_integer<A0, signed>::type itype;
+//       A0 m;
+//       itype expon;
+//       boost::fusion::tie(m, expon) = fast_frexp(a0);
+//       expon =  seladd(iseq(m, Mhalf<A0>()), expon, Mone<itype>());
+//       A0 diff =  fast_ldexp(Mone<A0>(), expon-Nbdigits<A0>());
+//       diff = sel(iseqz(diff)||iseqz(a0),  Mindenormal<A0>(), diff);
+//       return a0+diff;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

@@ -15,28 +15,34 @@
 #include <nt2/include/functions/abs.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for minmag
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute minmag(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<minmag_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::minmag_, tag::cpu_,
+                         (A0)(X),
+                         ((simd_<arithmetic_<A0>,X>))
+                         ((simd_<arithmetic_<A0>,X>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::minmag_(tag::simd_(tag::arithmetic_, X),
+                           tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0,A0)>
-      : meta::strip<A0>{};//
+    struct result<This(A0,A0)> : meta::strip<A0>{};
 
     NT2_FUNCTOR_CALL(2)
     {
-      return sel(islt(abs(a0), abs(a1)), a0, a1);
+      return sel(lt(abs(a0), abs(a1)), a0, a1);
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

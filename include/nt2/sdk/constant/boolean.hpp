@@ -16,7 +16,7 @@
 #include <nt2/sdk/meta/scalar_of.hpp>
 #include <nt2/sdk/constant/constant.hpp>
 
-namespace nt2 { namespace constants
+namespace nt2 { namespace tag
 {
   struct true_  {};
   struct false_ {};
@@ -24,39 +24,48 @@ namespace nt2 { namespace constants
 
 namespace nt2
 {
-  NT2_CONSTANT_IMPLEMENTATION(nt2::constants::true_ , True  )
-  NT2_CONSTANT_IMPLEMENTATION(nt2::constants::false_, False )
+  NT2_CONSTANT_IMPLEMENTATION(nt2::tag::true_ , True  )
+  NT2_CONSTANT_IMPLEMENTATION(nt2::tag::false_, False )
 }
 
-namespace nt2 { namespace functors
+NT2_REGISTER_DISPATCH(tag::true_ ,tag::cpu_,(A0),(target_< fundamental_<A0> >))
+NT2_REGISTER_DISPATCH(tag::false_,tag::cpu_,(A0),(target_< fundamental_<A0> >))
+
+namespace nt2 { namespace ext
 {
-  template<class Category,class Info>
-  struct  call<constants::true_,tag::constant_(Category),Info>
+  template<class Dummy>
+  struct  call< tag::true_(tag::target_(tag::fundamental_) )
+              , tag::cpu_
+              , Dummy
+              >
+        : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct  result<This(A0)> : meta::strip<A0>::type {};
 
-    template<class Target> inline typename Target::type const
-    operator()( Target const& ) const
+    NT2_FUNCTOR_CALL(1)
     {
-      return true;
+      typedef typename meta::scalar_of<typename A0::type>::type type;
+      return splat<typename A0::type>(true);
     }
   };
 
-  template<class Category,class Info>
-  struct  call<constants::false_,tag::constant_(Category),Info>
+  template<class Dummy>
+  struct  call< tag::false_(tag::target_(tag::fundamental_) )
+              , tag::cpu_
+              , Dummy
+              >
+        : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct  result<This(A0)>
-          : meta::strip<A0>::type {};
+    struct  result<This(A0)> : meta::strip<A0>::type {};
 
-    template<class Target> inline typename Target::type const
-    operator()( Target const& ) const
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::scalar_of<typename Target::type>::type type;
-      return splat<typename Target::type>(0);
+      typedef typename meta::scalar_of<typename A0::type>::type type;
+      return splat<typename A0::type>(false);
     }
   };
 } }

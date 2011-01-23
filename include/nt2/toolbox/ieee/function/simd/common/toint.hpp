@@ -10,25 +10,28 @@
 #define NT2_TOOLBOX_IEEE_FUNCTION_SIMD_COMMON_TOINT_HPP_INCLUDED
 #include <nt2/sdk/meta/strip.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::toint_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
 {
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute toint(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Dummy>
-  struct call<toint_,
-              tag::simd_(tag::arithmetic_,Extension),Dummy>
+  template<class X, class Dummy>
+  struct call<tag::toint_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::strip<A0>{};
 
-    // see documentation http://nt2.lri.fr/extension/custom_function.html
-    // for writing the functor implementation code 
-    // with or without type dispatching
 
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

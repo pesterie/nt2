@@ -14,41 +14,67 @@
 #include <nt2/include/functions/two_add.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for correct_fma
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute correct_fma(const A0& a0, const A0& a1, const A0& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<correct_fma_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::correct_fma_, tag::cpu_,
+                              (A0)(X),
+                              ((simd_<arithmetic_<A0>,X>))
+                              ((simd_<arithmetic_<A0>,X>))
+                              ((simd_<arithmetic_<A0>,X>))
+                             );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::correct_fma_(tag::simd_(tag::arithmetic_, X),
+                                tag::simd_(tag::arithmetic_, X),
+                                tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0,A0,A0)>
-      : meta::strip<A0>{};//
+    struct result<This(A0,A0,A0)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      3,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3,       real_)
-    {
-      A0 p, rp, s, rs;
-      boost::fusion::tie(p, rp) = two_prod(a0, a1);
-      boost::fusion::tie(s, rs) = two_add(p, a2);
-      return s+(rp+rs);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(3,       arithmetic_)
+    NT2_FUNCTOR_CALL(3)
     {
       return a0*a1+a2;
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::correct_fma_, tag::cpu_,
+                              (A0)(X),
+                              ((simd_<real_<A0>,X>))
+                              ((simd_<real_<A0>,X>))
+                              ((simd_<real_<A0>,X>))
+                             );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::correct_fma_(tag::simd_(tag::real_, X),
+                                tag::simd_(tag::real_, X),
+                                tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0,A0)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(3)
+    {
+      A0 p, rp, s, rs;
+      boost::fusion::tie(p, rp) = two_prod(a0, a1);
+      boost::fusion::tie(s, rs) = two_add(p, a2);
+      return s+(rp+rs);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

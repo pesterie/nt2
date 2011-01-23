@@ -11,26 +11,30 @@
 
 #include <nt2/include/functions/is_nez.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::any_, tag::cpu_,
+                     (A0),
+                     (fundamental_<A0>)
+                    )
+
+namespace nt2 { namespace ext
 {
-  /////////////////////////////////////////////////////////////////////////////
-  // Works on bool
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct validate<any_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef boost::mpl::true_ result_type;
-  };
-  
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute all(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<any_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::any_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     typedef bool result_type;
-    NT2_FUNCTOR_CALL(1) { return is_nez(a0); };
+
+    NT2_FUNCTOR_CALL(1)
+      {
+      return is_nez(a0);
+      };
+
   };
 } }
-      
+
 #endif
+// modified by jt the 26/12/2010

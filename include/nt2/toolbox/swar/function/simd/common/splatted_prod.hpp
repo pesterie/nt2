@@ -9,20 +9,23 @@
 #ifndef NT2_TOOLBOX_SWAR_FUNCTION_SIMD_COMMON_SPLATTED_PROD_HPP_INCLUDED
 #define NT2_TOOLBOX_SWAR_FUNCTION_SIMD_COMMON_SPLATTED_PROD_HPP_INCLUDED
 #include <nt2/sdk/meta/strip.hpp>
-
 #include <nt2/include/functions/prod.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for splatted_prod
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute splatted_prod(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<splatted_prod_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::splatted_prod_, tag::cpu_,
+                                (A0)(X),
+                                ((simd_<arithmetic_<A0>,X>))
+                               );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::splatted_prod_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -31,10 +34,11 @@ namespace nt2 { namespace functors
 
     NT2_FUNCTOR_CALL(1)
     {
-      return splat<A0>(a0[0]);
+      return splat<A0>(prod(a0));
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 05/01/2011

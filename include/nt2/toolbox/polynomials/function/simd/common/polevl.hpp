@@ -11,40 +11,69 @@
 #include <nt2/sdk/meta/strip.hpp>
 #include <nt2/include/functions/fma.hpp>
 #include <nt2/include/functions/tofloat.hpp>
+#include <boost/fusion/adapted/array.hpp>
 
-namespace nt2 { namespace functors
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::polevl_, tag::cpu_,
+                        (A0)(A1)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                        (fusion_sequence_<A1>)
+                        );
+
+namespace nt2 { namespace ext
 {
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute polevl(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Dummy>
-  struct call<polevl_,
-              tag::simd_(tag::arithmetic_,Extension),Dummy>
+  template<class X, class Dummy>
+  struct call<tag::polevl_(tag::simd_(tag::arithmetic_, X),
+                           tag::fusion_sequence_), 
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0, class A1>
     struct result<This(A0, A1)> : meta::strip<A0>{};
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+
+    NT2_FUNCTOR_CALL(2)
     {
-      typename A1::const_iterator p = a1.begin();
-      A0 ans =  nt2::splat<A0>(*p++);
-      do
-	ans = fma(ans, a0, nt2::splat<A0>(*p));
-      while( ++p !=  a1.end());
-      return ans;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type type;
-      return (tofloat(a0));
+      typedef typename NT2_RETURN_TYPE(2)::type type;
+      return polevl(tofloat(a0));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::polevl_, tag::cpu_,
+		      (A0)(A1)(X),
+                        ((simd_<real_<A0>,X>))
+                        (fusion_sequence_<A1>)
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::polevl_(tag::simd_(tag::real_, X),
+                          tag::fusion_sequence_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0, class A1>
+    struct result<This(A0, A1)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typename A1::const_iterator p = a1.begin();
+      A0 ans =  nt2::splat<A0>(*p++);
+      do
+      ans = fma(ans, a0, nt2::splat<A0>(*p));
+      while( ++p !=  a1.end());
+      return ans;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

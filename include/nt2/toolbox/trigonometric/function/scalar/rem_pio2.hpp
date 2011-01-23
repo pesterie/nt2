@@ -10,43 +10,84 @@
 #define NT2_TOOLBOX_TRIGONOMETRIC_FUNCTION_SCALAR_REM_PIO2_HPP_INCLUDED
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rem_pio2_, tag::cpu_,
+                          (A0),
+                          (arithmetic_<A0>)
+                         )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for rem_pio2
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute rem_pio2(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<rem_pio2_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::rem_pio2_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> : 
+    struct result<This(A0)> :
       boost::result_of<meta::arithmetic(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (3, (float,double,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       float)
-    {
-      return a0; /*PUT CODE HERE*/
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,      double)
-    {
-       return a0; /*PUT CODE HERE*/
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
+    NT2_FUNCTOR_CALL(1)
     {
       return a0; /*PUT CODE HERE*/
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rem_pio2_, tag::cpu_,
+                          (A0),
+                          (double_<A0>)
+                         )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::rem_pio2_(tag::double_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+       return a0; /*PUT CODE HERE*/
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rem_pio2_, tag::cpu_,
+                          (A0),
+                          (float_<A0>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::rem_pio2_(tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return a0; /*PUT CODE HERE*/
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

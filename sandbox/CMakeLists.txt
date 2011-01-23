@@ -12,8 +12,7 @@
 ################################################################################
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/)
 SET(SOURCES
-#    external_dispatch.cpp
-#    is_eq.cpp
+    foo.cpp
     )
 
 ADD_CUSTOM_TARGET(sandbox)
@@ -35,3 +34,4 @@ FOREACH( EXAMPLE ${SOURCES})
   SET_TARGET_PROPERTIES(${EXECUTABLE} PROPERTIES COMPILE_FLAGS ${NT2_CXX_SIMD_FLAGS})
   ADD_DEPENDENCIES(sandbox ${EXECUTABLE})
 ENDFOREACH()
+

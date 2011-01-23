@@ -15,49 +15,64 @@
 #include <nt2/include/functions/sign.hpp>
 #include <nt2/include/functions/is_nez.hpp>
 #include <nt2/include/functions/bitofsign.hpp>
+#include <nt2/include/functions/all.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tanh_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<arithmetic_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<tanh_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> :
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute tanh(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<tanh_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::tanh_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>:  meta::as_real<A0>{};
 
-   NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      const A0 x = abs(a0);
-      if (all(is_gt(x,splat<A0>(1.836840028483855e+01)))) return sign(a0); //TO DO
-      const A0 tmp1=expm1(-(x+x));
-      const A0 tmp2=-tmp1/(Two<A0>()+tmp1);
-      return b_xor(tmp2, bitofsign(a0));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
       return nt2::tanh(tofloat(a0));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::tanh_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<real_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::tanh_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>:  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      const A0 x = abs(a0);
+      if (all(gt(x,splat<A0>(1.836840028483855e+01)))) return sign(a0); //TO DO
+      const A0 tmp1=expm1(-(x+x));
+      const A0 tmp2=-tmp1/(Two<A0>()+tmp1);
+      return b_xor(tmp2, bitofsign(a0));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

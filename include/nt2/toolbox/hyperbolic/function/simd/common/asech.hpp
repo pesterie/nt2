@@ -12,51 +12,85 @@
 #include <nt2/sdk/simd/meta/is_real_convertible.hpp>
 #include <nt2/sdk/meta/strip.hpp>
 #include <nt2/include/functions/tofloat.hpp>
+#include <nt2/include/functions/rec.hpp>
 
 
-namespace nt2 { namespace functors
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::asech_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<asech_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute asech(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<asech_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::asech_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (float,double, arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  float)
-    {
-        return acosh(rec(a0));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, double)
-    {
-       A0 r;
-       map(functor<asech_>(), a0, r);
-       return r; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  arithmetic_)
+    NT2_FUNCTOR_CALL(1)
     {
       return nt2::acosh(rec(tofloat(a0)));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::asech_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<double_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::asech_(tag::simd_(tag::double_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return  map(functor<tag::asech_>(), a0);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::asech_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<float_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::asech_(tag::simd_(tag::float_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+        return acosh(rec(a0));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

@@ -11,16 +11,22 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for ldiv
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute ldiv(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<ldiv_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ldiv_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<arithmetic_<A0>,X>))
+                       ((simd_<arithmetic_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ldiv_(tag::simd_(tag::arithmetic_, X),
+                         tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -29,10 +35,11 @@ namespace nt2 { namespace functors
 
     NT2_FUNCTOR_CALL(2)
     {
-       return a1/a0; 
+      return divides(a1, a0);
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

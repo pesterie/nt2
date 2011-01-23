@@ -24,9 +24,18 @@
 *.suo
 *.exe
 *.desktop
-*.txt
 *.orig
 *_
+*.manifest
+*.res
+*.ilk
+*.pdb
+*.resource.txt
+*.bak
+.DS_Store
+.project
+.cproject
+
 ################################################################################
 # Ignore CMake generated files
 ################################################################################
@@ -39,6 +48,7 @@ Temp
 Testing
 Debug
 Release
+build
 
 ################################################################################
 # Ignore local bootstrap file

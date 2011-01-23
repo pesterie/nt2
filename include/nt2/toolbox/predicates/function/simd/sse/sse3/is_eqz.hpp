@@ -12,28 +12,51 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for is_eqz
 
-  template<class Extension,class Info>
-  struct call<is_eqz_,tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_eqz_, tag::cpu_,
+                         (A0),
+                         ((simd_<arithmetic_<A0>,tag::sse_>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_eqz_(tag::simd_(tag::arithmetic_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (int64_, arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,      arithmetic_)
+    NT2_FUNCTOR_CALL(1)
     {
       return eq(a0,Zero<A0>());
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,      int64_)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is int64_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_eqz_, tag::cpu_,
+                         (A0),
+                         ((simd_<int64_<A0>,tag::sse_>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_eqz_(tag::simd_(tag::int64_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
     {
       typedef simd::native<int32_t, tag::sse_> itype;
       typedef simd::native<float, tag::sse_>   ftype;
@@ -46,3 +69,4 @@ namespace nt2 { namespace functors
 } }
 
 #endif
+// modified by jt the 04/01/2011

@@ -13,41 +13,60 @@
 #include <nt2/sdk/meta/as_bits.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::firstbitunset_, tag::cpu_,
+                               (A0),
+                               (arithmetic_<A0>)
+                              )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for firstbitunset
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute firstbitunset(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<firstbitunset_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::firstbitunset_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> : 
-      meta::as_integer<A0, signed>{};
+    struct result<This(A0)> :
+      meta::as_integer<A0, unsigned>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::as_bits<A0, signed>::type type;
-      type that = {a0};
-      return firstbitunset(that.bits); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  arithmetic_)
-    {
-      return ~a0 & (a0+One<A0>()); 
+      return ~a0 & (a0+One<A0>());
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::firstbitunset_, tag::cpu_,
+                               (A0),
+                               (real_<A0>)
+                              )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::firstbitunset_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      meta::as_integer<A0, unsigned>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename meta::as_bits<A0, signed>::type type;
+      type that = {a0};
+      return firstbitunset(that.bits);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

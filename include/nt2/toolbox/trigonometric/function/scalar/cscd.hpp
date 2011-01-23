@@ -13,36 +13,34 @@
 #include <nt2/include/functions/csc.hpp>
 #include <nt2/include/functions/inrad.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::cscd_, tag::cpu_,
+                      (A0),
+                      (arithmetic_<A0>)
+                     )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for cscd
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute cscd(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<cscd_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::cscd_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> : 
+    struct result<This(A0)> :
       boost::result_of<meta::floating(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (1, (arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
+    NT2_FUNCTOR_CALL(1)
     {
-      if (!a0) return Nan<A0>(); 
-      return csc(inrad(a0)); 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      if (!a0) return Nan<type>();
+      return csc(inrad(a0));
     }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

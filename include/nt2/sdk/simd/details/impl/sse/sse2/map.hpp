@@ -9,62 +9,76 @@
 #ifndef NT2_SDK_SIMD_DETAILS_IMPL_SSE_SSE2_MAP_HPP_INCLUDED
 #define NT2_SDK_SIMD_DETAILS_IMPL_SSE_SSE2_MAP_HPP_INCLUDED
 
+#include <nt2/sdk/simd/category.hpp>
 #include <nt2/extension/parameters.hpp>
 #include <boost/preprocessor/tuple/elem.hpp>
+#include <boost/preprocessor/repetition/enum.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/repeat_from_to.hpp>
 
-#define NT2_MAP_INTERFACE(z,n,t)                                          \
-template<class This,class F,class A>                                      \
-struct result<This(F,NT2_PP_ENUM_VALUE(n,A))> : meta::strip<A> {};        \
-NT2_FUNCTOR_CALL_DISPATCH( BOOST_PP_INC(n)                                \
-                         , typename nt2::meta::scalar_of<A1>::type        \
-                         , (6,(double,float,int8_,int16_,int32_,int64_))  \
-                         )                                                \
+////////////////////////////////////////////////////////////////////////////////
+// Implement a SIMD map that apply a given function to any SSE vector types
+// This is done by enumerating all cases of function calls over the different
+// vector cardinal and function arity. SSE specifications make it requires a
+// painfull process of using mm_setr_xxx named functions depending on types
+// categories. Special case is the 64 bits integers that can be filled directly.
+////////////////////////////////////////////////////////////////////////////////
+#define M4(z,n,t) BOOST_PP_CAT(a,BOOST_PP_INC(n))[t]
+#define M3(z,n,t) a0(BOOST_PP_ENUM(t,M4,n))
+#define M2(z,n,t) ((simd_< BOOST_PP_TUPLE_ELEM(4,0,t) <A0>,tag::sse_>))
+#define M1(z,n,t) tag::simd_(tag::BOOST_PP_TUPLE_ELEM(4,0,t),tag::sse_)
+
+#define M64(n,t) A1 that = {{BOOST_PP_ENUM(2,M3,n)}}
+
+#define MN64(n,t)                                           \
+A1 that = { BOOST_PP_TUPLE_ELEM(4,2,t)                      \
+          (                                                 \
+            BOOST_PP_ENUM(BOOST_PP_TUPLE_ELEM(4,1,t),M3,n)  \
+          )                                                 \
+          }                                                 \
 /**/
 
-#define NT2_MAP_ARGS(z,n,t)     BOOST_PP_CAT(a,BOOST_PP_INC(n))[t]
-#define NT2_MAP_CALL(z,n,t)     a0(BOOST_PP_ENUM(t,NT2_MAP_ARGS,n))
-
-#define NT2_MAP_IMPL(z,n,t)                                             \
-NT2_FUNCTOR_CALL_EVAL_IF(BOOST_PP_INC(n),BOOST_PP_TUPLE_ELEM(3,0,t))    \
+#define M0(z,n,t)                                                       \
+NT2_REGISTER_DISPATCH ( tag::map_,tag::cpu_                             \
+                      , (Func)(A0)                                      \
+                      , (unspecified_<Func>)BOOST_PP_REPEAT(n,M2,t)     \
+                      )                                                 \
+namespace nt2 { namespace ext                                           \
 {                                                                       \
-  A1 that = { BOOST_PP_TUPLE_ELEM(3,2,t)                                \
-            (                                                           \
-              BOOST_PP_ENUM(BOOST_PP_TUPLE_ELEM(3,1,t),NT2_MAP_CALL,n)  \
-            )                                                           \
-            };                                                          \
-  return that;                                                          \
-}                                                                       \
+  template<class Dummy>                                                 \
+  struct call < tag::map_(tag::unspecified_,BOOST_PP_ENUM(n,M1,t))      \
+              , tag::cpu_ , Dummy> : callable                           \
+  {                                                                     \
+    template<class Sig> struct result;                                  \
+    template<class This,class F,class A>                                \
+    struct result<This(F,NT2_PP_ENUM_VALUE(n,A))> : meta::strip<A> {};  \
+    NT2_FUNCTOR_CALL(BOOST_PP_INC(n))                                   \
+    {                                                                   \
+      BOOST_PP_TUPLE_ELEM(4,3,t)(n,t);                                  \
+      return that;                                                      \
+    }                                                                   \
+  };                                                                    \
+} }                                                                     \
 /**/
 
-#define NT2_MAP_IMPL_64(z,n,t)                    \
-NT2_FUNCTOR_CALL_EVAL_IF(BOOST_PP_INC(n),int64_)  \
-{                                                 \
-  A1 that = {{BOOST_PP_ENUM(2,NT2_MAP_CALL,n)}};  \
-  return that;                                    \
-}                                                 \
+#define NT2_SIMD_MAP_CALL(T,C,S,N)                      \
+BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,M0, (T,C,S,N) ) \
 /**/
 
-namespace nt2 { namespace functors
-{
-  template<class Info>
-  struct call<map_,tag::simd_(tag::arithmetic_,tag::sse_),Info>
-  {
-    template<class Sig> struct result;
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_INTERFACE,~)
+NT2_SIMD_MAP_CALL(ints64_ ,  2 , ~              , M64 )
+NT2_SIMD_MAP_CALL(double_ ,  2 , _mm_setr_pd    , MN64)
+NT2_SIMD_MAP_CALL(float_  ,  4 , _mm_setr_ps    , MN64)
+NT2_SIMD_MAP_CALL(ints32_ ,  4 , _mm_setr_epi32 , MN64)
+NT2_SIMD_MAP_CALL(ints16_ ,  8 , _mm_setr_epi16 , MN64)
+NT2_SIMD_MAP_CALL(ints8_  , 16 , _mm_setr_epi8  , MN64)
 
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL,(double,2  ,_mm_setr_pd)    )
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL,(float ,4  ,_mm_setr_ps)    )
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL,(int32_,4  ,_mm_setr_epi32) )
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL,(int16_,8  ,_mm_setr_epi16) )
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL,(int8_ ,16 ,_mm_setr_epi8 ) )
-    BOOST_PP_REPEAT_FROM_TO(1,NT2_MAX_ARITY,NT2_MAP_IMPL_64,~ )
-  };
-} }
-
-#undef NT2_MAP_INTERFACE
-#undef NT2_MAP_ARGS
-#undef NT2_MAP_CALL
-#undef NT2_MAP_IMPL
-#undef NT2_MAP_IMPL_64
+#undef NT2_SIMD_MAP_CALL
+#undef MN64
+#undef M64
+#undef M4
+#undef M3
+#undef M2
+#undef M1
+#undef M0
 
 #endif

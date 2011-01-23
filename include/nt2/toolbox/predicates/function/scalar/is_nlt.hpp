@@ -11,35 +11,52 @@
 
 #include <nt2/include/functions/is_nan.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_nlt_, tag::cpu_,
+                        (A0)(A1),
+                        (arithmetic_<A0>)(arithmetic_<A1>)
+                       )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for is_nlt
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_nlt(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<is_nlt_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::is_nlt_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     typedef bool result_type;
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 2
-                              , A0
-                              , (2, (real_,arithmetic_))
-                              )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2, real_)
-    {
-       return ((a0 >= a1) || is_nan(a0)|| is_nan(a1));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
        return a0 >= a1;
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_nlt_, tag::cpu_,
+                        (A0)(A1),
+                        (real_<A0>)(real_<A1>)
+                       )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_nlt_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    typedef bool result_type;
+
+    NT2_FUNCTOR_CALL(2)
+    {
+       return ((a0 >= a1) || is_nan(a0)|| is_nan(a1));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

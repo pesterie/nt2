@@ -24,8 +24,8 @@ namespace nt2 { namespace memory
   //////////////////////////////////////////////////////////////////////////////
   // Allocate a raw buffer of bytes using an allocator
   //////////////////////////////////////////////////////////////////////////////
-  template<class Allocator>
-  static inline byte* allocate( Allocator& a, std::size_t nbytes )
+  template<class Allocator> inline byte*
+  allocate( Allocator& a, std::size_t nbytes )
   {
     // Allocator element types
     typedef typename Allocator::value_type value_type;
@@ -39,12 +39,14 @@ namespace nt2 { namespace memory
     std::size_t nelems = align_on<size>(nbytes+align+sizeof(void*))/size;
 
     // Allocate through a
-    void        *base     = a.allocate(nelems);
+    void *base     = a.allocate(nelems);
 
-    // Stash and stuff
+    // Compute stash and position
     std::size_t  ref      = reinterpret_cast<std::size_t>(base)+sizeof(void*);
     std::size_t  stashed  = (ref & fix) + align;
     void        *result   = reinterpret_cast<void*>(stashed);
+
+    // Save the real pointer in the pre-data stash
     reinterpret_cast<void**>(result)[-1] = base;
     return reinterpret_cast<byte*>(result);
   }

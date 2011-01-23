@@ -12,47 +12,59 @@
 #include <nt2/include/functions/is_ord.hpp>
 #include <nt2/include/functions/successor.hpp>
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<definitely_greater_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1,class A2>
-    struct result<This(A0,A1,A2)> : 
-      boost::is_integral<A2>{};
-  }; 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute definitely_greater(const A0& a0, const A1& a1, const A2& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<definitely_greater_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::definitely_greater_, tag::cpu_,
+                                    (A0)(A1)(A2),
+                                    (arithmetic_<A0>)(arithmetic_<A1>)(arithmetic_<A2>)
+                                   )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::definitely_greater_(tag::arithmetic_,tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1,class A2>
     struct result<This(A0,A1,A2)> {typedef bool type; };
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      3,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3,       real_)
-    {
-      return b_and(
-		   isord(a0, a1),
-		   (a0 >  successor(a1, a2))
-		   );
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(3, arithmetic_)
+    NT2_FUNCTOR_CALL(3)
     {
       return (a0 > a1+a2);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::definitely_greater_, tag::cpu_,
+                                    (A0)(A1)(A2),
+                                    (real_<A0>)(real_<A1>)(real_<A2>)
+                                   )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::definitely_greater_(tag::real_,tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1,class A2>
+    struct result<This(A0,A1,A2)> {typedef bool type; };
+
+    NT2_FUNCTOR_CALL(3)
+    {
+      return b_and(
+               isord(a0, a1),
+               (a0 >  successor(a1, a2))
+               );
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

@@ -17,42 +17,64 @@
 #include <nt2/include/functions/sqr.hpp>
 #include <nt2/include/functions/sign.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::atanh_, tag::cpu_,
+                       (A0),
+                       (arithmetic_<A0>)
+                      )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for atanh
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute atanh(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<atanh_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::atanh_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : boost::result_of<meta::floating(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 1
-                              , A0
-                              , (2, (real_, arithmetic_))
-                              )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      A0 absa0 = abs(a0); 
-      const A0 small_mask    = islt(absa0, Twotom10<A0>());  /* x <  2**-10 */
-      if (small_mask) { return a0*fma(Third<A0>(), sqr(a0), One<A0>()); }
-      return sign(a0)*Half<A0>()*log1p(Two<A0>()*absa0/(One<A0>()-absa0)); 
-    }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
+      typedef typename NT2_RETURN_TYPE(1)::type type;
       return nt2::atanh(type(a0));
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::atanh_, tag::cpu_,
+                       (A0),
+                       (real_<A0>)
+                      )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::atanh_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : boost::result_of<meta::floating(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      A0 absa0 = abs(a0);
+      //     const A0 small_mask    = lt(absa0, Twotom10<A0>());  /* x <  2**-10 */
+      //     if (small_mask) { return a0*fma(Third<A0>(), sqr(a0), One<A0>()); }
+      A0 t =  absa0+absa0;
+      if (absa0 < Half<A0>())
+      return sign(a0)*Half<A0>()*log1p(t+t*absa0/(One<A0>()-absa0));
+      else
+      return sign(a0)*Half<A0>()*log1p(t/(One<A0>()-absa0));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

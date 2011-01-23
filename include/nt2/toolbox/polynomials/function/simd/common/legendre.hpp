@@ -9,64 +9,84 @@
 #ifndef NT2_TOOLBOX_POLYNOMIALS_FUNCTION_SIMD_COMMON_LEGENDRE_HPP_INCLUDED
 #define NT2_TOOLBOX_POLYNOMIALS_FUNCTION_SIMD_COMMON_LEGENDRE_HPP_INCLUDED
 #include <nt2/sdk/simd/meta/is_real_convertible.hpp>
+#include <nt2/sdk/meta/adapted_traits.hpp>
 #include <nt2/sdk/constant/digits.hpp>
 #include <nt2/sdk/meta/strip.hpp>
 #include <nt2/include/functions/oneplus.hpp>
+#include <nt2/include/functions/tofloat.hpp>
+#include <nt2/include/functions/abs.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::legendre_, tag::cpu_,
+                          (A0)(A1)(X),
+                          ((integer_<A0>))
+                           ((simd_<arithmetic_<A1>,X>))
+                          );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<legendre_,tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::legendre_(tag::integer_,
+                             tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : meta::is_real_convertible<A0>{}; 
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute legendre(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<legendre_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      boost::result_of<meta::floating(A0)>{};
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :  meta::as_real<A1>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 p0 = One<A0>();
-      if(a0 == 0) return p0;
-      A0 p1 = a0;
-      A0 p;   
-      A0 vc =  One<A0>(); 
-      uint32_t c = 1;
-      while(c < a0)
-      	{
-       	  p = p0; 
-       	  p0 = p1;
-	  A0 vcp1 =  oneplus(vc); 
-	  p1 = ((vc + vcp1)*a0 * p0 - vc * p) /vcp1;
-      	  vc = vcp1;
-      	  ++c; 
-      	}
-      return p1;
+      typedef typename NT2_RETURN_TYPE(2)::type type;
+      return legendre(a0, tofloat(a1));
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
-      return legendre(type(a0));
-    }
-
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::legendre_, tag::cpu_,
+                          (A0)(A1)(X),
+                          ((integer_<A0>))
+                           ((simd_<real_<A1>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::legendre_(tag::integer_,
+                             tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :  meta::strip<A1>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      A1 p0 = One<A1>();
+      if(a0 == 0) return p0;
+      A1 p1 = a1;
+      A1 p;
+      A1 vc =  One<A1>();
+      uint32_t c = 1;
+      while(c < a0)
+            {
+              p = p0;
+              p0 = p1;
+        A1 vcp1 =  oneplus(vc);
+        p1 = ((vc + vcp1)*a1 * p0 - vc * p) /vcp1;
+              vc = vcp1;
+              ++c;
+            }
+      return b_or(p1, gt(abs(a1), One<A1>()));
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

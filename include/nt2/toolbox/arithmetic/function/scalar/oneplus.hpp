@@ -11,16 +11,20 @@
 #include <nt2/sdk/constant/digits.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::oneplus_, tag::cpu_,
+                         (A0),
+                         (fundamental_<A0>)
+                        )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for oneplus
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute oneplus(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<oneplus_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::oneplus_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -31,9 +35,9 @@ namespace nt2 { namespace functors
     {
       return a0+One<A0>();
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

@@ -16,42 +16,62 @@
 #include <nt2/include/functions/predecessor.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for ulp
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute ulp(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<ulp_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ulp_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<arithmetic_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ulp_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      const A0 x = abs(a0); 
-      //	 return sel(iseq(x, Inf<A0>()), x,  successor(x)-x);
-      A0 xp = predecessor(x); 
-      return sel(iseq(x, Inf<A0>()), xp-predecessor(xp), x - xp);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       arithmetic_)
-    {
-      details::ignore_unused(a0); 
+      details::ignore_unused(a0);
       return One<A0>();
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::ulp_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<real_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::ulp_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      const A0 x = abs(a0);
+      //     return sel(iseq(x, Inf<A0>()), x,  successor(x)-x);
+      A0 xp = predecessor(x);
+      return sel(is_equal(x, Inf<A0>()), xp-predecessor(xp), x - xp);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

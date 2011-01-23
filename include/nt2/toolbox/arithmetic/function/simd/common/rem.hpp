@@ -14,16 +14,22 @@
 #include <nt2/include/functions/idivfix.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for rem
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute rem(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<rem_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::rem_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<arithmetic_<A0>,X>))
+                      ((simd_<arithmetic_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::rem_(tag::simd_(tag::arithmetic_, X),
+                        tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -34,8 +40,9 @@ namespace nt2 { namespace functors
     {
       return selsub(is_nez(a1), a0,idivfix(a0,a1)*a1);
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

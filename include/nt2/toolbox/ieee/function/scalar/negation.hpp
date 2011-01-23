@@ -12,39 +12,58 @@
 #include <nt2/include/functions/is_nez.hpp>
 #include <nt2/include/functions/is_gez.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                          (A0)(A1),
+                          (arithmetic_<A0>)(arithmetic_<A1>)
+                         )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for negation
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute negation(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<negation_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::negation_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A1,
-      (2, (unsigned_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,   unsigned_)
-    {
-        return is_nez(a1)*a0;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
+    NT2_FUNCTOR_CALL(2)
     {
       return is_nez(a1)*(is_gez(a1)?a0:-a0);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A1 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::negation_, tag::cpu_,
+                          (A0)(A1),
+                          (unsigned_<A0>)(unsigned_<A1>)
+                         )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::negation_(tag::unsigned_,tag::unsigned_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+        return is_nez(a1)*a0;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

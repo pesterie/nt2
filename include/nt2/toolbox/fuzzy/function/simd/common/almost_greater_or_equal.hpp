@@ -14,46 +14,67 @@
 #include <nt2/include/functions/abs.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::almost_greater_or_equal_, tag::cpu_,
+                                          (A0)(X),
+                                          ((simd_<arithmetic_<A0>,X>))
+                                          ((simd_<arithmetic_<A0>,X>))
+                                          ((simd_<arithmetic_<A0>,X>))
+                                         );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<almost_greater_or_equal_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A0,A1)> :
-      meta::is_integral<A1>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute almost_greater_or_equal(const A0& a0, const A0& a1, const A0& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<almost_greater_or_equal_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::almost_greater_or_equal_(tag::simd_(tag::arithmetic_, X),
+                                            tag::simd_(tag::arithmetic_, X),
+                                            tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
     struct result<This(A0,A0,A1)> : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      3,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3,  real_)
-    {
-      return b_and(
-		   isord(a0, a1),
-		   isge(a0, predecessor(a1, a2))
-		   );
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(3, arithmetic_)
+    NT2_FUNCTOR_CALL(3)
     {
       return isge(a0, a1-abs(a2));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::almost_greater_or_equal_, tag::cpu_,
+                                          (A0)(X),
+                                          ((simd_<real_<A0>,X>))
+                                          ((simd_<real_<A0>,X>))
+                                          ((simd_<real_<A0>,X>))
+                                         );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::almost_greater_or_equal_(tag::simd_(tag::real_, X),
+                                            tag::simd_(tag::real_, X),
+                                            tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A0,A1)> : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(3)
+    {
+      return b_and(
+               isord(a0, a1),
+               isge(a0, predecessor(a1, a2))
+               );
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

@@ -11,44 +11,37 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for fma
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute fma(const A0& a0, const A0& a1, const A0& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<fma_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fma_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<arithmetic_<A0>,X>))
+                      ((simd_<arithmetic_<A0>,X>))
+                      ((simd_<arithmetic_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::fma_(tag::simd_(tag::arithmetic_, X),
+                        tag::simd_(tag::arithmetic_, X),
+                        tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0,A0)>
       : meta::strip<A0>{};//
+
     NT2_FUNCTOR_CALL(3)
     {
-      return a0*a1+a2; 
+      return a0*a1+a2;
     }
-  }; 
- //    NT2_FUNCTOR_CALL_DISPATCH(
-//       3,
-//       typename nt2::meta::scalar_of<A0>::type,
-//       (3, (float,double,arithmetic_))
-//     )
-//     NT2_FUNCTOR_CALL_EVAL_IF(2,       float)
-//     {
-//       A0 that =  {_mm256_macc_ps(a0,a1,a2)}; return that;
-//     }
-//     NT2_FUNCTOR_CALL_EVAL_IF(2,      double)
-//     {
-//       A0 that =  {_mm256_macc_pd(a0,a1,a2)}; return that;
-//     }
-//     NT2_FUNCTOR_CALL_EVAL_IF(2,     int16_t)
-//     {
-//        NT2_XOP_JOIN128INT3(that, _mm_macc_epi16)}; return that;
-//     }
+
+  };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

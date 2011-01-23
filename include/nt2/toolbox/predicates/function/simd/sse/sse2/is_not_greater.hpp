@@ -11,36 +11,87 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for is_not_greater
 
-  template<class Extension,class Info>
-  struct call<is_not_greater_,tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_not_greater_, tag::cpu_,
+                                 (A0),
+                                 ((simd_<arithmetic_<A0>,tag::sse_>))
+                                 ((simd_<arithmetic_<A0>,tag::sse_>))
+                                );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_not_greater_(tag::simd_(tag::arithmetic_, tag::sse_),
+                                   tag::simd_(tag::arithmetic_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0, A0)> : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (float,double,arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+      return le(a0,a1);
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,   float)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_not_greater_, tag::cpu_,
+                                 (A0),
+                                 ((simd_<double_<A0>,tag::sse_>))
+                                 ((simd_<double_<A0>,tag::sse_>))
+                                );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_not_greater_(tag::simd_(tag::double_, tag::sse_),
+                                   tag::simd_(tag::double_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0, A0)> : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 that =  { _mm_cmpngt_ps(a0,a1)}; return that; 
+      A0 that =  { _mm_cmpngt_pd(a0,a1)}; return that;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,     double)
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_not_greater_, tag::cpu_,
+                                 (A0),
+                                 ((simd_<float_<A0>,tag::sse_>))
+                                 ((simd_<float_<A0>,tag::sse_>))
+                                );
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_not_greater_(tag::simd_(tag::float_, tag::sse_),
+                                   tag::simd_(tag::float_, tag::sse_)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0, A0)> : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(2)
     {
-      A0 that =  { _mm_cmpngt_pd(a0,a1)}; return that; 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
-    {
-      return isle(a0,a1);
+      A0 that =  { _mm_cmpngt_ps(a0,a1)}; return that;
     }
   };
 } }
 
 #endif
+// modified by jt the 04/01/2011

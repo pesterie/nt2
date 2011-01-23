@@ -11,40 +11,55 @@
 #include <nt2/sdk/details/ignore_unused.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_nan_, tag::cpu_,
+                        (A0),
+                        (fundamental_<A0>)
+                       )
+
+namespace nt2 { namespace ext
 {
-
-  template<class Info>
-  struct validate<is_nan_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::is_nan_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
-    typedef boost::mpl::true_ result_type;
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_nan(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<is_nan_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef bool result_type; 
+    typedef bool result_type;
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (real_,fundamental_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-       return (a0 != a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, fundamental_)
-    {
-      details::ignore_unused(a0); 
-      return false; 
+      details::ignore_unused(a0);
+      return false;
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_nan_, tag::cpu_,
+                        (A0),
+                        (real_<A0>)
+                       )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::is_nan_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+
+    typedef bool result_type;
+
+
+    NT2_FUNCTOR_CALL(1)
+    {
+       return (a0 != a0);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

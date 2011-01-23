@@ -10,66 +10,63 @@
 #define NT2_SDK_MEMORY_SLICE_HPP_INCLUDED
 
 ////////////////////////////////////////////////////////////////////////////////
-// Padding strategies and related functors
+// Compute the number of slice between inner adn the Nth outer dimension
 ////////////////////////////////////////////////////////////////////////////////
+#include <nt2/sdk/meta/mpl.hpp>
+#include <nt2/sdk/meta/fusion.hpp>
 #include <nt2/sdk/memory/padding.hpp>
 #include <nt2/sdk/functor/functor.hpp>
 #include <boost/fusion/include/size.hpp>
+#include <nt2/sdk/memory/details/category.hpp>
 #include <nt2/sdk/functor/preprocessor/function.hpp>
-
-////////////////////////////////////////////////////////////////////////////////
-// Functor tags
-////////////////////////////////////////////////////////////////////////////////
-namespace nt2 { namespace functors
-{
-  struct slice_  {};
-
-  //////////////////////////////////////////////////////////////////////////////
-  // slice<Level>(sz,padder) computes the nbr of element between the Level and
-  // size(sz)th index level of a dimension sets
-  //////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct functor< slice_, Info >
-  {
-    struct validate { typedef boost::mpl::true_ result_type; };
-
-    template<class Sig> struct result;
-
-    template<class This,class Seq,class N,class Padder>
-    struct result<This(Seq const&,Padder const&,N const&)>
-    {
-      typedef call<slice_,tag::fusion_(Padder),Info>                callee;
-      typedef typename  std::tr1
-                      ::result_of<callee( Seq const&
-                                        , Padder const&
-                                        , N const&
-                                        )
-                                  >::type type;
-    };
-
-    template<class Seq,class N,class Padder> inline
-    typename meta::enable_call<slice_(Seq const&,Padder const&,N const&)>::type
-    operator()(Seq const& a0, Padder const& a1, N const& a2) const
-    {
-      functors::call<slice_,tag::fusion_(Padder),Info>  callee;
-      return callee(a0,a1,a2);
-    }
-  };
-} }
 
 namespace nt2
 {
-  template<int N, class S,class P> inline
-  typename  nt2::meta
-          ::enable_call<functors::slice_( S const&
-                                        , P const&
-                                        , boost::mpl::long_<N> const&
-                                        )>::type
-  slice(S const& s, P const& p)
+  namespace tag { struct slice_ {}; }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // slice computes the potential padded product of all dimensions in a given
+  // dimension set from the Nth.
+  //////////////////////////////////////////////////////////////////////////////
+  template<std::size_t N, class Seq,class Padding> inline
+  typename boost::
+  lazy_enable_if_c< (boost::fusion::result_of::size<Seq>::value >= N)
+                  , nt2::meta
+                    ::enable_call < tag::slice_ ( Seq const&
+                                                , Padding const&
+                                                , boost::mpl::size_t<N> const&
+                                                )
+                                  >
+                  >::type
+  slice(Seq const& s, Padding const& p)
   {
-    functors::functor< functors::slice_> callee;
-    return callee(s,p,boost::mpl::long_<N>() );
+    functor<tag::slice_> callee;
+    return callee(s,p,boost::mpl::size_t<N>() );
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // slice computes the potential padded product of all dimensions in a given
+  // dimension set from the Nth. As N is larger than the dimension set size, we
+  // naturally return 1.
+  //////////////////////////////////////////////////////////////////////////////
+  template<std::size_t N, class Seq,class Padding> inline
+  typename boost::
+  lazy_enable_if_c< (boost::fusion::result_of::size<Seq>::value < N)
+                  , boost::mpl::int_<1>
+                  >::type
+  slice(Seq const& , Padding const& )
+  {
+    return boost::mpl::int_<1>();
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// slice dispatch on basic padding strategy
+////////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH ( tag::slice_, tag::cpu_
+                      , (A0)(A1)(A2)
+                      , (fusion_sequence_<A0>)
+                        (padding_<A1>)
+                        (mpl_integral_< integer_<A2> >)
+                      )
 #endif

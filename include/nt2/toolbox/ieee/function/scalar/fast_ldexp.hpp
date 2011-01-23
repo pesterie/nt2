@@ -14,33 +14,51 @@
 #include <nt2/sdk/constant/real.hpp>
 #include <nt2/include/functions/bitwise_andnot.hpp>
 #include <iostream>
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fast_ldexp_, tag::cpu_,
+                            (A0)(A1),
+                            (integer_<A0>)(integer_<A1>)
+                           )
+
+namespace nt2 { namespace ext
 {
-
-  template<class Info>
-  struct validate<fast_ldexp_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::fast_ldexp_(tag::integer_,tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : meta::is_integral<A1> {};
+      struct result<This(A0, A1)> : meta::strip<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+       return (a1>=0)?(a0<<a1):(a0>>a1);
+    }
   };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute fast_ldexp(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<fast_ldexp_,tag::scalar_(tag::arithmetic_),Info>
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fast_ldexp_, tag::cpu_,
+                            (A0)(A1),
+                            (real_<A0>)(integer_<A1>)
+                           )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::fast_ldexp_(tag::real_,tag::integer_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-      struct result<This(A0, A1)> : meta::strip<A0>{}; 
+      struct result<This(A0, A1)> : meta::strip<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
       // No denormal provision
       typedef typename meta::as_integer<A0, unsigned>::type int_type;
@@ -55,13 +73,9 @@ namespace nt2 { namespace functors
       e += int_type(a1) << Nbmantissabits<A0>();
       return b_or(x, e);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
-    {
-       return (a1>=0)?(a0<<a1):(a0>>a1);
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010
+// manualy modified by jt the 29/12/2010

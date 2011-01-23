@@ -11,32 +11,38 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for minimum
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute minimum(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<minimum_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::minimum_, tag::cpu_,
+                          (A0)(X),
+                          ((simd_<arithmetic_<A0>,X>))
+                         );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::minimum_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>
     { typedef typename meta::scalar_of<A0>::type type; };
-    
+
+
     NT2_FUNCTOR_CALL(1)
     {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
-      type r = a0[0]; 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      type r = a0[0];
       for(size_t i=1; i < meta::cardinal_of<A0>::value; i++)
-	r = (r >  a0[i]) ? a0[i] : r;
-      return r; 
+      r = (r >  a0[i]) ? a0[i] : r;
+      return r;
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 05/01/2011

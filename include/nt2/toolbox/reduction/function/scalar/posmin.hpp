@@ -11,31 +11,36 @@
 
 #include <nt2/sdk/details/ignore_unused.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::posmin_, tag::cpu_,
+                        (A0),
+                        (fundamental_<A0>)
+                       )
+
+namespace nt2 { namespace ext
 {
-  /////////////////////////////////////////////////////////////////////////////
-  // Works on bool
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct validate<posmin_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::posmin_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
-    typedef boost::mpl::true_ result_type;
-  };
-  
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute posmin(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<posmin_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    typedef nt2::uint32_t result_type;
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>
+    {
+      typedef typename meta::as_integer<A0, signed>::type type;
+    };
 
     NT2_FUNCTOR_CALL(1)
     {
-      details::ignore_unused(a0); 
-      return 0; 
+      details::ignore_unused(a0);
+      return 0;
     }
+
   };
 } }
-  
+
 #endif
+// modified by jt the 26/12/2010

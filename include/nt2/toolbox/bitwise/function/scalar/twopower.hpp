@@ -13,46 +13,56 @@
 #include <nt2/include/functions/is_ltz.hpp>
 #include <nt2/sdk/meta/strip.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::twopower_, tag::cpu_,
+                          (A0),
+                          (arithmetic_<A0>)
+                         )
+
+namespace nt2 { namespace ext
 {
-
-  template<class Info>
-  struct validate<twopower_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::twopower_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> :
-      boost::is_integral<typename meta::strip<A0>::type>{}; 
-  };
+    struct result<This(A0)> : boost::result_of<meta::arithmetic(A0)>{};
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute twopower(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<twopower_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      boost::result_of<meta::arithmetic(A0)>{};
-
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (unsigned,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,    unsigned)
-    {
-       return One<A0>()<<a0;
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
+    NT2_FUNCTOR_CALL(1)
     {
        return (is_ltz(a0))?Zero<A0>():(One<A0>()<<a0);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::twopower_, tag::cpu_,
+                          (A0),
+                          (unsigned_<A0>)
+                         )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::twopower_(tag::unsigned_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+       return One<A0>()<<a0;
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

@@ -10,18 +10,24 @@
 #define NT2_TOOLBOX_PREDICATES_FUNCTION_SIMD_COMMON_SB2B_HPP_INCLUDED
 #include <nt2/sdk/constant/digits.hpp>
 #include <nt2/sdk/meta/strip.hpp>
+#include <nt2/include/functions/is_nez.hpp>
 
 
-namespace nt2 { namespace functors
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::sb2b_, tag::cpu_,
+                       (A0)(X),
+                       ((simd_<arithmetic_<A0>,X>))
+                      );
+
+namespace nt2 { namespace ext
 {
-  //  no special validate for sb2b
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute sb2b(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<sb2b_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::sb2b_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -30,10 +36,11 @@ namespace nt2 { namespace functors
 
     NT2_FUNCTOR_CALL(1)
     {
-      return b_and(a0, One<A0>());
+      return b_and(is_nez(a0), One<A0>());
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

@@ -11,28 +11,34 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for bitwise_notor
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute bitwise_notor(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<bitwise_notor_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::bitwise_notor_, tag::cpu_,
+                                (A0)(X),
+                                ((simd_<arithmetic_<A0>,X>))
+                                ((simd_<arithmetic_<A0>,X>))
+                               );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::bitwise_notor_(tag::simd_(tag::arithmetic_, X),
+                                  tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)>
-      : meta::strip<A0>{};//
+    struct result<This(A0,A1)>  : meta::strip<A0>{};//
 
     NT2_FUNCTOR_CALL(2)
     {
-      return b_or(b_not(a0),a1); 
+      return bitwise_or(complement(a0),a1);
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

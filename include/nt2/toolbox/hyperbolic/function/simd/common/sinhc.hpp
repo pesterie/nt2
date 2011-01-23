@@ -17,53 +17,66 @@
 #include <nt2/include/functions/fma.hpp>
 #include <nt2/include/functions/rec.hpp>
 #include <nt2/include/functions/sqr.hpp>
+#include <nt2/include/functions/tofloat.hpp>
 #include <nt2/toolbox/hyperbolic/function/scalar/constants.hpp>
 #include <nt2/sdk/constant/eps_related.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::sinhc_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<arithmetic_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<sinhc_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute sinhc(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<sinhc_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::sinhc_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>: meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      A0 a = abs(a0); 
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
-      A0 r1 = sinh(a)*rec(a);
-      A0 a2 = sqr(a); 
-      A0 r2 = oneplus(a2*fma(a2, Oneo_120<A0>(), Oneo_6<A0>()));
-      return sel(isge(a,Four<A0>()*Four<A0>()*Forthrooteps<A0>()), r1, r2); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return sinhc(type(a0));
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return nt2::sinhc(tofloat(a0));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::sinhc_, tag::cpu_,
+                        (A0)(X),
+                        ((simd_<real_<A0>,X>))
+                       );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::sinhc_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>: meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      A0 a = abs(a0);
+      A0 r1 = sinh(a)*rec(a);
+      A0 a2 = sqr(a);
+      A0 r2 = oneplus(a2*fma(a2, Oneo_120<A0>(), Oneo_6<A0>()));
+      return sel(ge(a,Four<A0>()*Four<A0>()*Fourthrooteps<A0>()), r1, r2);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

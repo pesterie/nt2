@@ -12,55 +12,88 @@
 #include <nt2/sdk/simd/meta/is_real_convertible.hpp>
 #include <nt2/sdk/constant/infinites.hpp>
 #include <nt2/sdk/meta/strip.hpp>
- #include <nt2/toolbox/trigonometric/function/simd/common/impl/trigo.hpp>
-//  MIGRATION WARNING you have to provide the file for the previous include from
-//  nt2/core/numeric/function/details/simd/common/impl/trigo.hpp
-//  of the old nt2
+#include <nt2/toolbox/trigonometric/function/simd/common/impl/trigo.hpp>
 #include <nt2/include/functions/copysign.hpp>
+#include <nt2/include/functions/is_nez.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is signed_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fast_cot_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<signed_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<fast_cot_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute fast_cot(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<fast_cot_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::fast_cot_(tag::simd_(tag::signed_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>:  meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (3, (real_,signed_, unsigned))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      return impl::trig_base<A0,radian_tag, fast_tag, tag::simd_type>::cota(a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       signed_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return b_or(nt2::copysign(Inf<type>, a0), isnez(a0));
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       unsigned_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return b_or(Inf<type>, isnez(a0)); 
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return b_or(nt2::copysign(Inf<type>(), simd::native_cast<type>(a0)), is_nez(a0));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fast_cot_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<unsigned_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::fast_cot_(tag::simd_(tag::unsigned_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>:  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+      return b_or(Inf<type>(), is_nez(a0));
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::fast_cot_, tag::cpu_,
+                           (A0)(X),
+                           ((simd_<real_<A0>,X>))
+                          );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::fast_cot_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>:  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return impl::trig_base<A0,radian_tag, fast_tag, tag::simd_type>::cota(a0);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

@@ -1,13 +1,13 @@
-/*******************************************************************************
- *         Copyright 2003 & onward LASMEA UMR 6602 CNRS/U.B.P
- *         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
- *
- *          Distributed under the Boost Software License, Version 1.0.
- *                 See accompanying file LICENSE.txt or copy at
- *                     http://www.boost.org/LICENSE_1_0.txt
- ******************************************************************************/
-#ifndef NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_EXPO_EXPO_FINALIZATION_HPP_INCLUDED
-#define NT2_CORE_NUMERIC_FUNCTION_DETAILS_SCALAR_IMPL_EXPO_EXPO_FINALIZATION_HPP_INCLUDED
+//////////////////////////////////////////////////////////////////////////////
+///   Copyright 2003 and onward LASMEA UMR 6602 CNRS/U.B.P Clermont-Ferrand
+///   Copyright 2009 and onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+///
+///          Distributed under the Boost Software License, Version 1.0
+///                 See accompanying file LICENSE.txt or copy at
+///                     http://www.boost.org/LICENSE_1_0.txt
+//////////////////////////////////////////////////////////////////////////////
+#ifndef NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_EXPO_EXPO_FINALIZATION_HPP_INCLUDED
+#define NT2_TOOLBOX_EXPONENTIAL_FUNCTION_SCALAR_IMPL_EXPO_EXPO_FINALIZATION_HPP_INCLUDED
 #include <nt2/include/functions/fast_ldexp.hpp>
 #include <nt2/include/functions/select.hpp>
 #include <nt2/include/functions/toint.hpp>
@@ -57,7 +57,7 @@ namespace nt2
 	  A0 y = oneminus(((-(x*c)/(Two<A0>()-c))-x));
 	  y = fast_ldexp(y, toint(k));
 	  // adjust for 2^n n flint
-	  return  sel(b_and(isgtz(a0), isflint(a0)),  round2even(y), y);
+	  return  sel(b_and(is_gtz(a0), is_flint(a0)),  round2even(y), y);
 	}
       };
 
@@ -69,7 +69,7 @@ namespace nt2
 	{
 	  A0 y = fast_ldexp(c, toint(k));
 	  //adjust for 10^n n flint
-	  return  sel(b_and(isgtz(a0), isflint(a0)),  round2even(y), y);
+	  return  sel(b_and(is_gtz(a0), is_flint(a0)),  round2even(y), y);
 	}
       };
 

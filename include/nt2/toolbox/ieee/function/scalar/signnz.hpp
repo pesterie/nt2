@@ -14,45 +14,88 @@
 #include <nt2/include/functions/is_ltz.hpp>
 #include <nt2/include/functions/is_gez.hpp>
 #include <nt2/include/functions/is_nan.hpp>
+#include <nt2/include/functions/is_positive.hpp>
+#include <nt2/include/functions/is_negative.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is signed_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::signnz_, tag::cpu_,
+                        (A0),
+                        (signed_<A0>)
+                       )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for signnz
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute signnz(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<signnz_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::signnz_(tag::signed_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> :
       boost::result_of<meta::arithmetic(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (3, (real_,unsigned_,signed_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
-    {
-      return is_nan(a0)?a0:is_gez(a0)-is_ltz(a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,   unsigned_)
-    {
-      details::ignore_unused(a0);
-      return One<A0>();
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,     signed_)
+    NT2_FUNCTOR_CALL(1)
     {
       return is_gez(a0)-is_ltz(a0);
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::signnz_, tag::cpu_,
+                        (A0),
+                        (unsigned_<A0>)
+                       )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::signnz_(tag::unsigned_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      details::ignore_unused(a0);
+      return One<A0>();
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::signnz_, tag::cpu_,
+                        (A0),
+                        (real_<A0>)
+                       )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::signnz_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return is_nan(a0)?a0:is_positive(a0)-is_negative(a0);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

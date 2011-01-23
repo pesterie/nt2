@@ -16,38 +16,42 @@
 #include <nt2/include/functions/is_odd.hpp>
 #include <nt2/include/functions/floor.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::signgam_, tag::cpu_,
+                         (A0),
+                         (fundamental_<A0>)
+                        )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for signgam
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute signgam(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<signgam_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::signgam_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> : 
+    struct result<This(A0)> :
       boost::result_of<meta::floating(A0)>{};
 
     NT2_FUNCTOR_CALL(1)
     {
-	typedef typename NT2_CALL_RETURN_TYPE(1)::type type;
-        if (islez(a0))
-	  {
-	    if (isflint(a0))
-	      return Nan<type>();
-	    else
-	      return One<type>()-isodd(floor(a0))*Two<A0>(); 
-	  }
-	else
-	  return One<type>();
+      typedef typename NT2_RETURN_TYPE(1)::type type;
+        if (is_lez(a0))
+        {
+          if (is_flint(a0))
+            return Nan<type>();
+          else
+            return One<type>()-is_odd(floor(a0))*Two<A0>();
+        }
+      else
+        return One<type>();
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

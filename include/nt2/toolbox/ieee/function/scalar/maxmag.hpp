@@ -11,29 +11,33 @@
 
 #include <nt2/include/functions/abs.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::maxmag_, tag::cpu_,
+                        (A0)(A1),
+                        (fundamental_<A0>)(fundamental_<A1>)
+                       )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for maxmag
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute maxmag(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<maxmag_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::maxmag_(tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
     NT2_FUNCTOR_CALL(2)
     {
        return (abs(a0) > abs(a1)) ? a0 : a1;
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

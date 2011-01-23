@@ -11,34 +11,44 @@
 #include <nt2/sdk/meta/strip.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for posmin
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute posmin(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<posmin_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::posmin_, tag::cpu_,
+                         (A0)(X),
+                         ((simd_<arithmetic_<A0>,X>))
+                        );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::posmin_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
-    typedef int32_t result_type;
-    
+     template<class This,class A0>
+    struct result<This(A0)>
+    {
+      typedef typename meta::scalar_of<A0>::type stype;
+      typedef typename meta::as_integer<stype, signed>::type type;
+    };
+
+
     NT2_FUNCTOR_CALL(1)
     {
-      typedef typename meta::scalar_of<A0>::type type; 
+      typedef typename meta::scalar_of<A0>::type type;
       int p = 0;
-      type m = a0[0]; 
+      type m = a0[0];
       for(size_t i=1; i < meta::cardinal_of<A0>::value; i++)// TODO UNROLL
-	{
-	  if (m > a0[i]){m = a0[i]; p = i; }
-	}
-      return p; 
+      {
+        if (m > a0[i]){m = a0[i]; p = i; }
+      }
+      return p;
     }
 
   };
 } }
 
-      
 #endif
+// modified by jt the 05/01/2011

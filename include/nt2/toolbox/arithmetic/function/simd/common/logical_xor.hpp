@@ -12,16 +12,22 @@
 #include <nt2/include/functions/is_nez.hpp>
 
 
-namespace nt2 { namespace functors
-{
-  //  no special validate for logical_xor
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute logical_xor(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<logical_xor_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::logical_xor_, tag::cpu_,
+                              (A0)(X),
+                              ((simd_<arithmetic_<A0>,X>))
+                              ((simd_<arithmetic_<A0>,X>))
+                             );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::logical_xor_(tag::simd_(tag::arithmetic_, X),
+                                tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -32,8 +38,9 @@ namespace nt2 { namespace functors
     {
       return b_xor(is_nez(a0), is_nez(a1));
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

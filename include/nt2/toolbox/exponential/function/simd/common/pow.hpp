@@ -15,53 +15,72 @@
 #include <nt2/include/functions/select.hpp>
 #include <nt2/include/functions/seladd.hpp>
 #include <nt2/include/functions/is_eqz.hpp>
+#include <nt2/include/functions/is_nez.hpp>
 #include <nt2/include/functions/exp.hpp>
 #include <nt2/include/functions/log.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::pow_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<arithmetic_<A0>,X>))
+                      ((simd_<arithmetic_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<pow_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
-      meta::is_real_convertible<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute pow(const A0& a0, const A0& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<pow_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::pow_(tag::simd_(tag::arithmetic_, X),
+                        tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0,A0)> :  meta::as_real<A0>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+    NT2_FUNCTOR_CALL(2)
     {
-      return seladd(isnez(a0),
-		    Zero<A0>(),
-		    sel(iseqz(a1),
-			One<A0>(),
-			exp(a1*log(a0))
-			)
-		    );
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type type; 
+      typedef typename NT2_RETURN_TYPE(2)::type type;
       return nt2::pow(tofloat(a0), tofloat(a1));
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::pow_, tag::cpu_,
+                      (A0)(X),
+                      ((simd_<real_<A0>,X>))
+                      ((simd_<real_<A0>,X>))
+                     );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::pow_(tag::simd_(tag::real_, X),
+                        tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0,A0)> :  meta::as_real<A0>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      return seladd(is_nez(a0),
+                Zero<A0>(),
+                sel(is_eqz(a1),
+                  One<A0>(),
+                  exp(a1*log(a0))
+                  )
+                );
+    }
+  };
+} }
+
 #endif
+// modified by jt the 05/01/2011

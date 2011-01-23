@@ -13,45 +13,56 @@
 #include <nt2/sdk/constant/digits.hpp>
 
 
-namespace nt2 { namespace functors
-{
 
-  template<class Info>
-  struct validate<exponent_,tag::scalar_(tag::arithmetic_),Info>
-  {
-    template<class Sig> struct result; 
-    template<class This,class A0>
-    struct result<This(A0)> :
-      meta::is_floating_point<typename meta::strip<A0>::type>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute exponent(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<exponent_,tag::scalar_(tag::arithmetic_),Info>
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is double
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::exponent_, tag::cpu_,
+                          (A0),
+                          (double_<A0>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::exponent_(tag::double_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)> : meta::as_integer<A0, signed>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (float,double))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  float)
-    {
-      return a0 ? ::ilogbf(a0) : Zero<A0>();
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, double)
+    NT2_FUNCTOR_CALL(1)
     {
        return a0 ? ::ilogb(a0) : Zero<A0>();
     }
-
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is float
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::exponent_, tag::cpu_,
+                          (A0),
+                          (float_<A0>)
+                         )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::exponent_(tag::float_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> : meta::as_integer<A0, signed>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return a0 ? ::ilogbf(a0) : Zero<A0>();
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

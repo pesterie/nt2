@@ -15,22 +15,20 @@
 //
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::exponentbits_, tag::cpu_,
+                               (A0)(X),
+                               ((simd_<arithmetic_<A0>,X>))
+                              );
+
+namespace nt2 { namespace ext
 {
-  template<class Extension,class Info>
-  struct validate<exponentbits_,tag::simd_(tag::arithmetic_,Extension),Info>
-  {
-    template<class Sig> struct result;
-    template<class This,class A0>
-    struct result<This(A0)> : 
-      meta::is_floating_point<A0>{};
-  };
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute exponentbits(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<exponentbits_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::exponentbits_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
@@ -47,8 +45,9 @@ namespace nt2 { namespace functors
       const result_type Mask = splat<result_type>((2*me+1)<<nmb);
       return (b_and(Mask, a0));
     }
+
   };
 } }
 
-      
 #endif
+// modified by jt the 04/01/2011

@@ -10,16 +10,20 @@
 #define NT2_TOOLBOX_ARITHMETIC_FUNCTION_SCALAR_MIN_HPP_INCLUDED
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::min_, tag::cpu_,
+                     (A0)(A1),
+                     (fundamental_<A0>)(fundamental_<A1>)
+                    )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for min
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute min(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<min_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::min_(tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
@@ -28,12 +32,12 @@ namespace nt2 { namespace functors
 
     NT2_FUNCTOR_CALL(2)
     {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type type;
+      typedef typename NT2_RETURN_TYPE(2)::type type;
       return (a0 < a1) ? a0 :  a1;
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

@@ -8,12 +8,10 @@
 //////////////////////////////////////////////////////////////////////////////
 #define NT2_UNIT_MODULE "nt2 arithmetic toolbox - unit/simd Mode"
 
-
 #include <nt2/toolbox/arithmetic/include/logical_xor.hpp> 
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
@@ -28,7 +26,7 @@
 NT2_TEST_CASE_TPL(logical_xor, NT2_SIMD_TYPES )
 {
  using nt2::logical_xor;
- using nt2::functors::logical_xor_;    
+ using nt2::tag::logical_xor_;    
  using nt2::load;  
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;

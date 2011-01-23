@@ -12,21 +12,20 @@
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
 #include <nt2/sdk/functor/meta/call.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <nt2/include/functions/is_gez.hpp>
+
 //////////////////////////////////////////////////////////////////////////////
 // Test behavior of arithmetic components using NT2_TEST_CASE
 //////////////////////////////////////////////////////////////////////////////
-
 NT2_TEST_CASE_TPL(minmod, NT2_SIMD_TYPES )
 {
  using nt2::minmod;
- using nt2::functors::minmod_;    
+ using nt2::tag::minmod_;    
  using nt2::load;  
  using nt2::simd::native; 
  using nt2::meta::cardinal_of;
@@ -45,9 +44,8 @@ NT2_TEST_CASE_TPL(minmod, NT2_SIMD_TYPES )
    n_t v  = minmod(a0, a1);
    for(std::size_t j=0;j<cardinal_of<n_t>::value;++j) 
      {
+       std::cout << a0[j] <<  "  " << a1[j] << "  " <<  v[j] <<  "  " << minmod(a0[j], a1[j]) << std::endl; 
       NT2_TEST_EQUAL( v[j], minmod(a0[j], a1[j]) );
      }
- }
+}
  
- 
-   

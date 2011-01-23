@@ -10,22 +10,17 @@
 #define NT2_CORE_TIMING_CTIC_HPP_INCLUDED
 
 ////////////////////////////////////////////////////////////////////////////////
-//
+// Coutn cycles
 ////////////////////////////////////////////////////////////////////////////////
-#include <cstdio>
+#include <nt2/core/timing/now.hpp>
 #include <nt2/core/timing/timer.hpp>
-#include <nt2/core/timing/impl/cycles.hpp>
 
 namespace nt2 { namespace details
 {
   struct cycle_based_timer
   {
+    static void Print(const cycles_t& val);
     static inline cycles_t Time() { return read_cycles(); }
-
-    static inline void Print(const cycles_t& val)
-    {
-      printf("Elapsed time is %llu s.\n",val);
-    }
   };
 
   counter<cycles_t,cycle_based_timer>  const cycle_timer = {};
@@ -33,9 +28,9 @@ namespace nt2 { namespace details
 
 namespace nt2 { namespace time
 {
-  static inline void ctic() { details::cycle_timer.tic(); }
+  inline void ctic() { details::cycle_timer.tic(); }
 
-  static inline details::cycles_t  ctoc( bool display = true)
+  inline details::cycles_t  ctoc( bool display = true)
   {
     return details::cycle_timer.toc(display);
   }

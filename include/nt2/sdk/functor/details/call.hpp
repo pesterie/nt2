@@ -13,11 +13,16 @@
 // User-overloadable call meta-function
 // Documentation:http://nt2.lri.fr/extension/custom_function.html
 ////////////////////////////////////////////////////////////////////////////////
-#include <boost/mpl/bool.hpp>
-#include <nt2/sdk/meta/unknown.hpp>
+#include <boost/type_traits/is_same.hpp>
 #include <nt2/sdk/error/static_assert.hpp>
 
-namespace nt2 { namespace functors
+////////////////////////////////////////////////////////////////////////////////
+// Forward declare the unknown_ tag and the error_with helper
+////////////////////////////////////////////////////////////////////////////////
+namespace nt2 { namespace tag { struct unknown_;    } }
+namespace nt2 { namespace tag { struct error_with;  } }
+
+namespace nt2 { namespace ext
 {
   //////////////////////////////////////////////////////////////////////////////
   // Flag call instanciation as callable
@@ -27,10 +32,18 @@ namespace nt2 { namespace functors
   //////////////////////////////////////////////////////////////////////////////
   // Call to non-categorizable types ends up in error
   //////////////////////////////////////////////////////////////////////////////
-  template<class Function,class I>
-  struct call<Function,tag::unknown,I> : callable
+  template<class Function,class Site,class Dummy>
+  struct call<Function(tag::unknown_),Site,Dummy>
   {
-    NT2_STATIC_ASSERT( (false), UNIMPLEMENTED_FUNCTOR, (Function) );
+    typedef int result_type;
+    NT2_STATIC_ASSERT ( (boost::is_same<Function,void>::value)
+                      , NT2_UNSUPPORTED_FUNCTION_CALL
+                      , "If you get an error here, you tried to call a nt2 "
+                        "function on values which types is not supported by nt2 "
+                        "or which is not implemented on the given type. "
+                        "Check that you included the proper toolbox or use the "
+                        "correct type in your function call."
+                      );
   };
 } }
 

@@ -16,40 +16,59 @@
 //  nt2/core/numeric/function/details/scalar/impl/trigo.hpp
 //  of the old nt2
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::sinpi_, tag::cpu_,
+                       (A0),
+                       (arithmetic_<A0>)
+                      )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for sinpi
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute sinpi(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<sinpi_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::sinpi_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct result<This(A0)> : 
+    struct result<This(A0)> :
       boost::result_of<meta::arithmetic(A0)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      A0,
-      (2, (real_, arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,  real_)
+    NT2_FUNCTOR_CALL(1)
     {
-       return impl::trig_base<A0,pi_tag, trig_tag, tag::not_simd_type>::sina(a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      details::ignore_unused(a0); 
-      return Zero<A0>(); 
+      details::ignore_unused(a0);
+      return Zero<A0>();
     }
   };
 } }
 
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::sinpi_, tag::cpu_,
+                       (A0),
+                       (real_<A0>)
+                      )
 
-      
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::sinpi_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)> :
+      boost::result_of<meta::arithmetic(A0)>{};
+
+    NT2_FUNCTOR_CALL(1)
+    {
+       return impl::trig_base<A0,pi_tag, trig_tag, tag::not_simd_type>::sina(a0);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 26/12/2010

@@ -18,36 +18,39 @@
 #include <nt2/include/functions/is_ngez.hpp>
 #include <nt2/include/functions/exp.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::anp_, tag::cpu_,
+                     (A0)(A1),
+                     (fundamental_<A0>)(fundamental_<A1>)
+                    )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for anp
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute anp(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<anp_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::anp_(tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
     struct  result<This(A0,A1)>
           : boost::result_of<meta::arithmetic(A0,A1)>{};
 
-
     NT2_FUNCTOR_CALL(2)
     {
       typedef typename boost::result_of<meta::floating(A0, A1)>::type type;
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type rtype;
-      if (isngez(a0)||isngez(a1)) return Nan<type>();
-      if (islt(a0,a1)) return Zero<type>();
+      typedef typename NT2_RETURN_TYPE(2)::type rtype;
+      if (is_ngez(a0)||is_ngez(a1)) return (rtype)Nan<type>();
+      if (lt(a0,a1)) return (rtype)Zero<type>();
       const type n = oneplus(round2even(a0));
       const type p = round2even(a1);
       return (rtype)round2even(exp(gammaln(n)-gammaln(n-p)));
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

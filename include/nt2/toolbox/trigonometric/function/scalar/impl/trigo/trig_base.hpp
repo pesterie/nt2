@@ -107,7 +107,7 @@ namespace nt2
 	      int_type swap_bit = n&One<int_type>();
 	      int_type sign_bit = shli(b_xor(swap_bit, (n&2)>>1), de);
 	      A0 z = sqr(xr);
-	      if (isnez(swap_bit))
+	      if (is_nez(swap_bit))
 		{
 		  z = eval_t::sin_eval(z, xr, xc);
 		}
@@ -135,7 +135,7 @@ namespace nt2
 	      int_type swap_bit = n&One<int_type>();
 	      A0 sign_bit = b_xor(bitofsign(a0), shli(n&Two<int_type>(), de-1));
 	      A0 z = sqr(xr);
-	      if (iseqz(swap_bit))
+	      if (is_eqz(swap_bit))
 		{
 		  z = eval_t::sin_eval(z, xr, xc);
 		}
@@ -150,7 +150,7 @@ namespace nt2
 	static inline A0 tana(const  A0& a0)
 	{
 	  if (redu_t::tan_invalid(a0)) return Nan<A0>();
-	  if (iseqz(a0)) return a0;
+	  if (is_eqz(a0)) return a0;
 	  A0 x =  abs(a0);
 	  if (redu_t::replacement_needed(x))
 	    {
@@ -186,7 +186,7 @@ namespace nt2
 
 	static inline void sincosa(const  A0& a0, A0& s, A0& c)
 	{
-	  if (isinvalid(a0)) { s = c = Nan<A0>(); return; }
+	  if (is_invalid(a0)) { s = c = Nan<A0>(); return; }
 	  A0 x =  abs(a0);
 	  if (redu_t::replacement_needed(x))
 	    {
@@ -202,7 +202,7 @@ namespace nt2
 	      int_type cos_sign_bit = shli(b_xor(swap_bit, (n&2)>>1), de);
 	      int_type sin_sign_bit = b_xor(bitofsign(a0), shli(n&2, de-1));
 
-	      if (isnez(swap_bit))
+	      if (is_nez(swap_bit))
 		{
 		  c = eval_t::sin_eval(z, xr, xc);
 		  s = eval_t::cos_eval(z, xr, xc);

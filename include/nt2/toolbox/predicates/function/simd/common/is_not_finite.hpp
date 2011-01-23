@@ -11,41 +11,62 @@
 #include <nt2/sdk/constant/boolean.hpp>
 #include <nt2/sdk/details/ignore_unused.hpp>
 #include <nt2/sdk/meta/strip.hpp>
+#include <nt2/include/functions/is_nan.hpp>
 
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_not_finite_, tag::cpu_,
+                                (A0)(X),
+                                ((simd_<arithmetic_<A0>,X>))
+                               );
+
+namespace nt2 { namespace ext
 {
-  //  no special validate for is_not_finite
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute is_not_finite(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Extension,class Info>
-  struct call<is_not_finite_,
-              tag::simd_(tag::arithmetic_,Extension),Info>
+  template<class X, class Dummy>
+  struct call<tag::is_not_finite_(tag::simd_(tag::arithmetic_, X)),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>
       : meta::strip<A0>{};//
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      1,
-      typename nt2::meta::scalar_of<A0>::type,
-      (2, (real_,arithmetic_))
-    )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+    NT2_FUNCTOR_CALL(1)
     {
-      return isnan(a0-a0);
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       arithmetic_)
-    {
-      details::ignore_unused(a0); 
+      details::ignore_unused(a0);
       return False<A0>();
     }
   };
 } }
 
-      
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::is_not_finite_, tag::cpu_,
+                                (A0)(X),
+                                ((simd_<real_<A0>,X>))
+                               );
+
+namespace nt2 { namespace ext
+{
+  template<class X, class Dummy>
+  struct call<tag::is_not_finite_(tag::simd_(tag::real_, X)),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+    struct result<This(A0)>
+      : meta::strip<A0>{};//
+
+    NT2_FUNCTOR_CALL(1)
+    {
+      return is_nan(a0-a0);
+    }
+  };
+} }
+
 #endif
+// modified by jt the 04/01/2011

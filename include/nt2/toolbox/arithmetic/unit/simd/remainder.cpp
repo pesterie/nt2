@@ -8,12 +8,10 @@
 //////////////////////////////////////////////////////////////////////////////
 #define NT2_UNIT_MODULE "nt2 arithmetic toolbox - unit/simd Mode"
 
-
 #include <nt2/toolbox/arithmetic/include/remainder.hpp> 
 #include <nt2/sdk/unit/tests.hpp>
 #include <nt2/sdk/unit/module.hpp>
 #include <nt2/sdk/simd/native.hpp>
-#include <../unit/sdk/simd/types.hpp>
 #include <nt2/sdk/memory/is_aligned.hpp>
 #include <nt2/sdk/memory/aligned_type.hpp>
 #include <nt2/sdk/memory/load.hpp>
@@ -27,7 +25,7 @@
 // NT2_TEST_CASE_TPL(remainder, (double)(float)(int32_t)(uint32_t)(uint64_t)(int16_t)(uint16_t)(int8_t)(uint8_t) )
 // {
 //  using nt2::remainder;
-//  using nt2::functors::remainder_;    
+//  using nt2::tag::remainder_;    
 //  using nt2::load;  
 //  using nt2::simd::native; 
 //  using nt2::meta::cardinal_of;

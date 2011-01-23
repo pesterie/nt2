@@ -10,34 +10,62 @@
 #define NT2_TOOLBOX_IEEE_FUNCTION_SCALAR_NEXTPOW2_HPP_INCLUDED
 #include <nt2/sdk/meta/as_integer.hpp>
 #include <nt2/sdk/constant/real.hpp>
+#include <nt2/sdk/meta/as_integer.hpp>
+#include <nt2/sdk/meta/adapted_traits.hpp>
 #include <boost/fusion/tuple.hpp>
 
 #include <nt2/include/functions/frexp.hpp>
+#include <nt2/include/functions/tofloat.hpp>
 #include <nt2/include/functions/minusone.hpp>
 #include <nt2/include/functions/abs.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nextpow2_, tag::cpu_,
+                          (A0),
+                          (arithmetic_<A0>)
+                         )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for nextpow2
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute nextpow2(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<nextpow2_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::nextpow2_(tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
-    struct  result<This(A0)>
-          : boost::result_of<meta::floating(A0)>{};
+      struct result<This(A0)> :
+      meta::as_integer<typename boost::result_of<meta::floating(A0)>::type, signed>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 1
-                              , A0
-                              , (2, (real_,arithmetic_))
-                              )
+    NT2_FUNCTOR_CALL(1)
+    {
+      return nt2::nextpow2(tofloat(a0));
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(1,       real_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::nextpow2_, tag::cpu_,
+                          (A0),
+                          (real_<A0>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::nextpow2_(tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0>
+      struct result<This(A0)> :
+      meta::as_integer<typename boost::result_of<meta::floating(A0)>::type, signed>{};
+
+    NT2_FUNCTOR_CALL(1)
     {
       typedef typename meta::as_integer<A0, signed>::type int_type;
       A0 m;
@@ -45,14 +73,8 @@ namespace nt2 { namespace functors
       boost::fusion::tie(m, p) = nt2::frexp(nt2::abs(a0));
       return (m == Half<A0>())  ? minusone(p) :  p;
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(1, arithmetic_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(1)::type type; 
-      return nt2::nextpow2(type(a0));
-    }
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

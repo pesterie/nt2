@@ -8,39 +8,43 @@
 //////////////////////////////////////////////////////////////////////////////
 #ifndef NT2_TOOLBOX_IEEE_FUNCTION_SCALAR_MODF_HPP_INCLUDED
 #define NT2_TOOLBOX_IEEE_FUNCTION_SCALAR_MODF_HPP_INCLUDED
-#include <boost/fusion/tuple.hpp>
+#include <nt2/sdk/meta/strip.hpp>
+#include <boost/fusion/include/at.hpp>
+#include <boost/fusion/include/vector.hpp>
 
 
-namespace nt2 { namespace functors
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::modf_, tag::cpu_,
+                      (A0),
+                      (fundamental_<A0>)
+                     )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for modf
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute modf(const A0& a0)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<modf_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::modf_(tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0>
     struct result<This(A0)>
     {
-      typedef typename boost::result_of<meta::floating(A0)>::type etype;
-      typedef boost::fusion::tuple<etype, etype>                   type;
+      typedef typename meta::strip<A0>::type            etype;
+      typedef boost::fusion::vector<etype, etype>        type;
     };
 
     NT2_FUNCTOR_CALL(1)
     {
-      typename NT2_CALL_RETURN_TYPE(1)::type res;
-      typedef typename boost::result_of<meta::floating(A0)>::type etype;
-      boost::fusion::at_c<0>(res) = trunc(a0);
-      boost::fusion::at_c<1>(res)= a0 - boost::fusion::at_c<0>(res);
+      typename NT2_RETURN_TYPE(1)::type res;
+      boost::fusion::at_c<1>(res) = trunc(a0);
+      boost::fusion::at_c<0>(res)= a0 - boost::fusion::at_c<1>(res);
       return res;
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

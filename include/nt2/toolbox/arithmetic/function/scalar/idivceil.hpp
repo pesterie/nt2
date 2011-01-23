@@ -13,60 +13,100 @@
 #include <nt2/include/functions/abs.hpp>
 #include <nt2/include/functions/rdivide.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is arithmetic_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivceil_, tag::cpu_,
+                          (A0)(A1),
+                          (arithmetic_<A0>)(arithmetic_<A1>)
+                         )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for idivceil
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute idivceil(const A0& a0, const A1& a1)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<idivceil_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::idivceil_(tag::arithmetic_,tag::arithmetic_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This,class A0,class A1>
-    struct result<This(A0,A1)> : 
+    struct result<This(A0,A1)> :
       boost::result_of<meta::arithmetic(A0,A1)>{};
 
-    NT2_FUNCTOR_CALL_DISPATCH(
-      2,
-      A0,
-      (3, (real_,unsigned_, arithmetic_))
-    )
+    NT2_FUNCTOR_CALL(2)
+    {
+      return ceil(float(a0)/float(a1)); // TO DO
+//       typedef typename NT2_RETURN_TYPE(2)::type  type;
+//        if (a0 > 0)
+//    {
+//      if (a1 > 0)
+//          return rdivide((a0+(a1-One<type>())), a1);
+//      else
+//          return -rdivide((a0+(-a1-One<type>())), -a1);
+//    }
+//        else
+//    {
+//      if (a1 > 0)
+//          return -rdivide((-a0+(a1+One<type>())), a1);
+//      else
+//          return rdivide((-a0+(-a1-One<type>())), -a1);
+//    }
+    }
+  };
+} }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(2,       real_)
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is unsigned_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivceil_, tag::cpu_,
+                          (A0)(A1),
+                          (unsigned_<A0>)(unsigned_<A1>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::idivceil_(tag::unsigned_,tag::unsigned_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
+    {
+      typedef typename NT2_RETURN_TYPE(2)::type  type;
+      return rdivide((a0+(a1-One<type>())), a1);
+    }
+  };
+} }
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type A0 is real_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::idivceil_, tag::cpu_,
+                          (A0)(A1),
+                          (real_<A0>)(real_<A1>)
+                         )
+
+namespace nt2 { namespace ext
+{
+  template<class Dummy>
+  struct call<tag::idivceil_(tag::real_,tag::real_),
+              tag::cpu_, Dummy> : callable
+  {
+    template<class Sig> struct result;
+    template<class This,class A0,class A1>
+    struct result<This(A0,A1)> :
+      boost::result_of<meta::arithmetic(A0,A1)>{};
+
+    NT2_FUNCTOR_CALL(2)
     {
       return ceil(a0/a1);
     }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, unsigned_)
-    {
-      typedef typename NT2_CALL_RETURN_TYPE(2)::type  type;
-      return rdivide((a0+(a1-One<type>())), a1); 
-    }
-    NT2_FUNCTOR_CALL_EVAL_IF(2, arithmetic_)
-    {
-      return ceil(float(a0)/float(a1)); // TO DO
-//       typedef typename NT2_CALL_RETURN_TYPE(2)::type  type;
-//        if (a0 > 0)
-//  	{
-// 	  if (a1 > 0)
-// 	      return rdivide((a0+(a1-One<type>())), a1);
-// 	  else
-// 	      return -rdivide((a0+(-a1-One<type>())), -a1);
-//  	}
-//        else
-//  	{
-// 	  if (a1 > 0)
-// 	      return -rdivide((-a0+(a1+One<type>())), a1);
-// 	  else
-// 	      return rdivide((-a0+(-a1-One<type>())), -a1);
-//  	}
-    }
-
-   };
+  };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010

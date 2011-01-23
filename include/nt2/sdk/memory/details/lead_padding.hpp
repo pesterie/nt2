@@ -10,172 +10,135 @@
 #define NT2_SDK_MEMORY_DETAILS_LEAD_PADDING_HPP_INCLUDED
 
 ////////////////////////////////////////////////////////////////////////////////
-// Padding strategies for memory allocation
+// Implementation of the no_padding strategy for memory allocation
 ////////////////////////////////////////////////////////////////////////////////
-#include <boost/mpl/pair.hpp>
+#include <nt2/sdk/meta/fusion.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <nt2/sdk/memory/slice.hpp>
 #include <nt2/sdk/memory/stride.hpp>
 #include <nt2/sdk/memory/align_on.hpp>
-#include <boost/fusion/include/at.hpp>
-#include <nt2/sdk/memory/details/times.hpp>
-#include <boost/fusion/include/value_at.hpp>
+#include <nt2/sdk/memory/details/no_padding.hpp>
 #include <nt2/sdk/functor/preprocessor/call.hpp>
-#include <nt2/sdk/memory/no_padding.hpp>
 
-////////////////////////////////////////////////////////////////////////////////
-// slice Functor implementation
-////////////////////////////////////////////////////////////////////////////////
-namespace nt2 { namespace functors
+namespace nt2 { namespace ext
 {
-  template<class Info>
-  struct call<slice_,tag::fusion_(memory::lead_padding),Info>
+  template<class Dummy>
+  struct  call< tag::slice_ ( tag::fusion_sequence_
+                            , tag::padding_(memory::lead_padding)
+                            , tag::mpl_integral_(tag::integer_)
+                            )
+              , tag::cpu_, Dummy  >
+        : callable
   {
     ////////////////////////////////////////////////////////////////////////////
-    // Template status for selecting between {N,S} state space
-    ////////////////////////////////////////////////////////////////////////////
-    template<bool Same, bool One> struct status {};
-
-    ////////////////////////////////////////////////////////////////////////////
-    // result_of protocol
+    // Computes the actual result type depending on A0 size and A2 value
     ////////////////////////////////////////////////////////////////////////////
     template<class Sig> struct result;
 
-    template<class This,class Seq,class Padder,class N>
-    struct  result<This(Seq const&,Padder const&,N const&)>
+    template<class This,class A0, class A1, class A2>
+    struct  result<This(A0,A1,A2)>
     {
-		typedef typename boost::fusion::result_of::size<Seq>::type seq_size;
+      typedef typename meta::strip<A2>::type        arg0;
+      typedef typename meta::strip<A2>::type        arg2;
+      typedef boost::fusion::result_of::size<arg0>  size_;
+      static  typename meta::strip<A0>::type const& s;
 
-      template<bool Same, bool One, class Dummy=void> struct inner
-      {
-        static Seq const& s;
-        static details::times callee;
-        BOOST_TYPEOF_NESTED_TYPEDEF_TPL
-        ( nested
-        , callee( slice<N::value+1>(s,memory::lead_padding())
-                , boost::fusion::at_c<N::value-1>(s)
+      BOOST_TYPEOF_NESTED_TYPEDEF_TPL
+      ( true_case
+      , nt2::mul( slice<2>(s,memory::no_padding())
+                , memory::align_on( boost::fusion::at_c<0>(s) )
                 )
-        );
-        typedef typename nested::type type;
-      };
+      );
 
-      // N==S but N!=1
-      template<class Dummy>
-      struct  inner<true,false,Dummy>
-            : boost::fusion::result_of::at_c<Seq const,N::value-1>
-      {};
+      BOOST_TYPEOF_NESTED_TYPEDEF_TPL
+      ( false_case, slice<arg2::value>(s,memory::no_padding())
+      );
 
-      // N==1 but N!=S
-      template<class Dummy>
-      struct  inner<false,true,Dummy>
-      {
-        static Seq const& s;
-        static details::times callee;
-        BOOST_TYPEOF_NESTED_TYPEDEF_TPL
-        ( nested
-        , callee( memory::align_on( boost::fusion::at_c<0>(s) )
-                , slice<2>(s,memory::lead_padding())
-                )
-        );
-        typedef typename nested::type type;
-      };
-
-      // N==1 and S==1
-      template<class Dummy>
-      struct  inner<true,true,Dummy>
-      {
-        static Seq const& s;
-        BOOST_TYPEOF_NESTED_TYPEDEF_TPL
-        ( nested
-        , memory::align_on( boost::fusion::at_c<0>(s) )
-        );
-        typedef typename nested::type type;
-      };
-
-      typedef typename inner<(N::value==seq_size::value),(N::value==1)>::type type;
+      typedef typename boost::mpl::eval_if_c< (arg2::value == 1)
+                                            , true_case
+                                            , false_case
+                                            >::type type;
     };
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 3
-                              , (status< A2::value==  boost::fusion::result_of::size<A0>::value
-                                        ,(A2::value==1)
-                                        >
-                                )
-                              , ( 4,( (status<true  , true> )
-                                    , (status<false , true> )
-                                    , (status<true  , false>)
-                                    , (status<false , false>)
-                                    )
-                                )
-                              )
-    NT2_FUNCTOR_CALL_EVAL_IF(3, (status<false , false>) )
+    ////////////////////////////////////////////////////////////////////////////
+    // Implementation when A2 == 1
+    ////////////////////////////////////////////////////////////////////////////
+    template<class A0, class A1, class A2> inline
+    typename boost::lazy_enable_if_c< (A2::value==1), NT2_RETURN_TYPE(3)>::type
+    operator()( A0 const& a0, A1 const&, A2 const& ) const
     {
-      details::times callee;
-      return callee ( slice<A2::value+1>(a0,memory::lead_padding())
-                    , boost::fusion::at_c<A2::value-1>(a0)
-                    );
+      return nt2::mul ( slice<2>(a0,memory::no_padding())
+                      , memory::align_on( boost::fusion::at_c<0>(a0) )
+                      );
     }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(3, (status<true , false>) )
+    ////////////////////////////////////////////////////////////////////////////
+    // Implementation when A2 >= 1
+    ////////////////////////////////////////////////////////////////////////////
+    template<class A0, class A1, class A2> inline
+    typename boost::lazy_enable_if_c< (A2::value!=1), NT2_RETURN_TYPE(3)>::type
+    operator()( A0 const& a0, A1 const&, A2 const& ) const
     {
-      return boost::fusion::at_c<A2::value-1>(a0);
-    }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3, (status<false , true>) )
-    {
-      details::times callee;
-      return callee ( memory::align_on( boost::fusion::at_c<0>(a0) )
-                    , slice<2>(a0,memory::lead_padding())
-                    );
-    }
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3, (status<true , true>) )
-    {
-      return memory::align_on(boost::fusion::at_c<0>(a0));
+      return slice<A2::value>(a0,memory::no_padding());
     }
   };
 } }
 
 ////////////////////////////////////////////////////////////////////////////////
-// stride Functor implementation
-// Nothing special as the padding is after all the meaningful data
+// stride Functor implementation - Do nothing except on inner dimension
 ////////////////////////////////////////////////////////////////////////////////
-namespace nt2 { namespace functors
+namespace nt2 { namespace ext
 {
-  template<class Info>
-  struct  call<stride_,tag::fusion_(memory::lead_padding),Info>
+  template<class Dummy>
+  struct  call< tag::stride_( tag::fusion_sequence_
+                            , tag::padding_(memory::lead_padding)
+                            , tag::mpl_integral_(tag::integer_)
+                            )
+              , tag::cpu_, Dummy  >
+        : callable
   {
+    ////////////////////////////////////////////////////////////////////////////
+    // Computes the actual result type depending on A0 size and A2 value
+    ////////////////////////////////////////////////////////////////////////////
     template<class Sig> struct result;
 
-    template<class This,class Seq,class Padder, class N>
-    struct  result<This(Seq const&,Padder const&,N const&)>
+    template<class This,class A0, class A1, class A2>
+    struct  result<This(A0,A1,A2)>
     {
-      typedef boost::fusion::result_of::at_c<Seq const,N::value-1> non_leading;
-      static Seq const& s;
+      typedef typename meta::strip<A2>::type        arg0;
+      typedef typename meta::strip<A2>::type        arg2;
+      static  typename meta::strip<A0>::type const& s;
+
       BOOST_TYPEOF_NESTED_TYPEDEF_TPL
-      ( leading
+      ( true_case
       , memory::align_on( boost::fusion::at_c<0>(s) )
       );
 
-      typedef typename  boost::mpl::eval_if_c < (N::value==1)
-                                              , leading
-                                              , non_leading
-                                              >::type             type;
+      BOOST_TYPEOF_NESTED_TYPEDEF_TPL
+      ( false_case, boost::fusion::at_c<arg2::value-1>(s) );
+
+      typedef typename boost::mpl::eval_if_c< (arg2::value == 1)
+                                            , true_case
+                                            , false_case
+                                            >::type type;
     };
 
-    NT2_FUNCTOR_CALL_DISPATCH ( 3
-                              , boost::mpl::bool_<(A2::value==1)>
-                              , ( 2,( boost::mpl::true_
-                                    , boost::mpl::false_
-                                    )
-                                )
-                              )
-
-    NT2_FUNCTOR_CALL_EVAL_IF(3, boost::mpl::true_   )
+    ////////////////////////////////////////////////////////////////////////////
+    // Implementation when A2 == 1
+    ////////////////////////////////////////////////////////////////////////////
+    template<class A0, class A1, class A2> inline
+    typename boost::lazy_enable_if_c< (A2::value==1), NT2_RETURN_TYPE(3)>::type
+    operator()( A0 const& a0, A1 const&, A2 const& ) const
     {
       return memory::align_on( boost::fusion::at_c<0>(a0) );
     }
 
-    NT2_FUNCTOR_CALL_EVAL_IF(3, boost::mpl::false_  )
+    ////////////////////////////////////////////////////////////////////////////
+    // Implementation when A2 >= 1
+    ////////////////////////////////////////////////////////////////////////////
+    template<class A0, class A1, class A2> inline
+    typename boost::lazy_enable_if_c< (A2::value!=1), NT2_RETURN_TYPE(3)>::type
+    operator()( A0 const& a0, A1 const&, A2 const& ) const
     {
       return boost::fusion::at_c<A2::value-1>(a0);
     }

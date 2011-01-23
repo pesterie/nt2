@@ -10,16 +10,20 @@
 #define NT2_TOOLBOX_BITWISE_FUNCTION_SCALAR_BITWISE_SELECT_HPP_INCLUDED
 #include <nt2/include/functions/bitwise_andnot.hpp>
 
-namespace nt2 { namespace functors
+
+/////////////////////////////////////////////////////////////////////////////
+// Implementation when type  is fundamental_
+/////////////////////////////////////////////////////////////////////////////
+NT2_REGISTER_DISPATCH(tag::bitwise_select_, tag::cpu_,
+                                (A0)(A1)(A2),
+                                (fundamental_<A0>)(fundamental_<A1>)(fundamental_<A2>)
+                               )
+
+namespace nt2 { namespace ext
 {
-
-  //  no special validate for bitwise_select
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Compute bitwise_select(const A0& a0, const A1& a1, const A2& a2)
-  /////////////////////////////////////////////////////////////////////////////
-  template<class Info>
-  struct call<bitwise_select_,tag::scalar_(tag::arithmetic_),Info>
+  template<class Dummy>
+  struct call<tag::bitwise_select_(tag::fundamental_,tag::fundamental_,tag::fundamental_),
+              tag::cpu_, Dummy> : callable
   {
     template<class Sig> struct result;
     template<class This, class A0, class A1>
@@ -29,9 +33,9 @@ namespace nt2 { namespace functors
     {
       return b_or(b_and(a1, a0), b_andnot(a2, a0));
     }
+
   };
 } }
 
-
-      
 #endif
+// modified by jt the 26/12/2010
