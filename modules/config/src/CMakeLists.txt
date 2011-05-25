@@ -20,5 +20,10 @@ INCLUDE_DIRECTORIES(
   )
 
 add_executable(configure EXCLUDE_FROM_ALL ${CONFIG_SOURCES} )
-set_property(TARGET configure PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set_property(TARGET configure PROPERTY 
+             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+             )
+set_property(TARGET configure PROPERTY 
+             OUTPUT_NAME "configure.run" 
+             )
 target_link_libraries(configure ${HWLOC_LIBRARY_DIR})
