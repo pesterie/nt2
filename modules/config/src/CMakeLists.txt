@@ -1,23 +1,28 @@
-##############################################################################
-###   Copyright 2003 and onward LASMEA UMR 6602 CNRS/U.B.P Clermont-Ferrand
-###   Copyright 2009 and onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
-###
-###          Distributed under the Boost Software License, Version 1.0
-###                 See accompanying file LICENSE.txt or copy at
-###                     http://www.boost.org/LICENSE_1_0.txt
-##############################################################################
+################################################################################
+#         Copyright 2003 & onward LASMEA UMR 6602 CNRS/Univ. Clermont II
+#         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+#
+#          Distributed under the Boost Software License, Version 1.0.
+#                 See accompanying file LICENSE.txt or copy at
+#                     http://www.boost.org/LICENSE_1_0.txt
+################################################################################
+
+include(NT2Module)
 nt2_module_source_setup(config)
 nt2_module_configure_toolbox(config 0)
 
-include(FindHWLOC)
+################################################################################
+# Generate bootstrap.hpp
+################################################################################
+CONFIGURE_FILE( ${NT2_CONFIG_ROOT}/src/bootstrap.hpp.cmake
+                ${PROJECT_BINARY_DIR}/include/nt2/sdk/config/bootstrap.hpp
+              )
 
-set(CONFIG_SOURCES
-    main.cpp)
+file( GLOB_RECURSE source_config_files
+      ${NT2_CONFIG_ROOT}/src/*
+    )
 
-INCLUDE_DIRECTORIES( 
-  "${PROJECT_SOURCE_DIR}/include/"
-  "${HWLOC_INCLUDE_ROOT}"
-  )
+SET(SOURCE_FILES ${source_config_files} CACHE INTERNAL "")
 
 add_executable(configure EXCLUDE_FROM_ALL ${CONFIG_SOURCES} )
 set_property(TARGET configure PROPERTY 
