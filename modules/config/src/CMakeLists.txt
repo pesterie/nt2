@@ -24,7 +24,17 @@ file( GLOB_RECURSE source_config_files
 
 SET(SOURCE_FILES ${source_config_files} CACHE INTERNAL "")
 
-add_executable(configure EXCLUDE_FROM_ALL ${CONFIG_SOURCES} )
+
+
+if(NT2_CUSTOM_CONFIGURATION)
+
+include(FindHWLOC)
+
+file( GLOB_RECURSE source_configurator_files
+      ${NT2_CONFIG_ROOT}/src/configurator/*
+    )
+
+add_executable(configure EXCLUDE_FROM_ALL ${source_configurator_files} )
 set_property(TARGET configure PROPERTY 
              RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
              )
@@ -32,3 +42,5 @@ set_property(TARGET configure PROPERTY
              OUTPUT_NAME "configure.run" 
              )
 target_link_libraries(configure ${HWLOC_LIBRARY_DIR})
+
+endif()
