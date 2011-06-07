@@ -1,3 +1,5 @@
+display = False
+
 class Tree(object):
     
     def __init__(self, value, children = []):
@@ -93,6 +95,7 @@ def path_split(str):
     return l
 
 import os
+import sys
 class SimdFile(object):
     
     def __init__(self, context, dir):
@@ -125,6 +128,8 @@ class SimdFile(object):
                 os.mkdir(path)
 
         f = open(binary_path, 'w')
+        if(display):
+            sys.stdout.write('/'.join(self.file) + "\n")
         return f
         
     def write_header(self, f):
@@ -158,7 +163,9 @@ class SimdFile(object):
         else:
             if(self.dir == ['all']):
               toolbox = self.path_prefix[-2]
+              f.write("#ifndef __WAVE__\n")
               f.write("#include NT2_" + toolbox.upper() + "_INCLUDE(" + str.join('/', self.basefile) + ")\n")
+              f.write("#endif\n")
             i = 0
             for parent in parents:
                 if(self.dir == ['all'] and i == all_include):
@@ -190,10 +197,13 @@ def main_(source, binary, prefix, function, simd_dir):
     f = SimdFile(context, ['all'])
     f.create_forward(tree.linearize())
 
-import sys
 import optparse
 def main():
     parser = optparse.OptionParser()
+    parser.add_option('-d', '--display',
+                      default=False,
+                      action="store_true",
+                     )
     parser.add_option('', '--no-simd-dir',
                       default=False,
                       action="store_true",
@@ -208,6 +218,9 @@ def main():
                      ) 
     options, args = parser.parse_args()
     options = options.__dict__
+    
+    global display
+    display = options['display']
     
     if(not options['no_default_baseline']):
         options['baseline'].insert(0, '.')

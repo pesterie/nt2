@@ -14,9 +14,9 @@ nt2_module_configure_toolbox(config 0)
 ################################################################################
 # Generate bootstrap.hpp
 ################################################################################
-CONFIGURE_FILE( ${NT2_CONFIG_ROOT}/src/bootstrap.hpp.cmake
-                ${PROJECT_BINARY_DIR}/include/nt2/sdk/config/bootstrap.hpp
-              )
+nt2_module_configure_file(bootstrap.hpp.cmake
+                          nt2/sdk/config/bootstrap.hpp
+                         )
 
 file( GLOB_RECURSE source_config_files
       ${NT2_CONFIG_ROOT}/src/*
