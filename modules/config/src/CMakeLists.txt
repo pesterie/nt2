@@ -9,7 +9,7 @@
 
 include(NT2Module)
 nt2_module_source_setup(config)
-nt2_module_configure_toolbox(config 0)
+#nt2_module_configure_toolbox(config 0)
 
 ################################################################################
 # Generate bootstrap.hpp
@@ -29,6 +29,15 @@ SET(SOURCE_FILES ${source_config_files} CACHE INTERNAL "")
 if(NT2_CUSTOM_CONFIGURATION)
 
 include(FindHWLOC)
+find_library(BOOST_PROGRAM_OPT_STATIC libboost_program_options.a  ${Boost_LIBRARIES}) 
+find_library(BOOST_PROGRAM_OPT_SHARED libboost_program_options.so ${Boost_LIBRARIES}) 
+if(BOOST_PROGRAM_OPT_STATIC)
+  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_STATIC})
+elseif(BOOST_PROGRAM_OPT_SHARED)
+  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_SHARED})
+else()
+  message("Boost Program Options library can not be")
+endif()
 
 file( GLOB_RECURSE source_configurator_files
       ${NT2_CONFIG_ROOT}/src/configurator/*
@@ -41,6 +50,6 @@ set_property(TARGET configure PROPERTY
 set_property(TARGET configure PROPERTY 
              OUTPUT_NAME "configure.run" 
              )
-target_link_libraries(configure ${HWLOC_LIBRARY_DIR})
+target_link_libraries(configure ${BOOST_PROGRAM_OPT})
 
 endif()
