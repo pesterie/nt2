@@ -14,7 +14,7 @@
 #include <nt2/sdk/config/configurator/cpuid.hpp>
 #include <nt2/sdk/config/configurator/utils.hpp>
 #include <nt2/sdk/config/configurator/core.hpp>
-#include <nt2/sdk/config/configurator/vectorial.hpp>
+#include <nt2/sdk/config/configurator/simd.hpp>
 #include <iterator>
 #include <cassert>
 
@@ -61,7 +61,7 @@ int main(int ac, char *av[])
 
 void test(void)
 {
-  boost::array<std::string,10> ext = { {"mmx","sse","sse2","sse3","ssse3","sse4.1","sse4.2","avx","xop","fma4"} };
+  boost::array<std::string,9> ext = { {"sse","sse2","sse3","ssse3","sse4.1","sse4.2","avx","xop","fma4"} };
 
   std::cout << "===============================" << std::endl;
   std::cout << "Threads (logical cores per physical cores) : " << nt2::config::get_threads() << std::endl;
@@ -84,7 +84,7 @@ void test(void)
   std::cout << "Cache coherency line size : " << nt2::config::get_cache_coherency_line_size(cache) << std::endl;
   std::cout << "===============================" << std::endl;
 
-  for(int i = 0; i < 10; ++i)
+  for(int i = 0; i < 9; ++i)
     {
       if (nt2::config::has_vectorial_extension(ext[i]))
         {

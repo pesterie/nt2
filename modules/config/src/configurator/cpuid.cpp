@@ -9,7 +9,7 @@
 #include <nt2/sdk/config/configurator/cpuid.hpp>
 #include <string>
 
-namespace nt2{ namespace config{
+namespace nt2 { namespace config{
 
 #ifdef __GNUC__
 void __cpuid( int CPUInfo[4],int InfoType)

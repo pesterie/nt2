@@ -15,7 +15,7 @@
 
 namespace nt2{ namespace config {
 
-int has_vectorial_extension(std::string target);
+int has_vectorial_extension(std::string const& target);
 
 struct matcher
 {

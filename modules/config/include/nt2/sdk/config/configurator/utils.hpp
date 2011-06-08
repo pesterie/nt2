@@ -12,7 +12,7 @@
 #include <cassert>
 #include <iostream>
 
-namespace nt2{ namespace config { namespace utils{
+namespace nt2 { namespace config { namespace utils {
 
 bool has_bit_set(int value, int bit);
 int  get_byte(int reg, int pos);

@@ -8,7 +8,7 @@
  ******************************************************************************/
 #include <nt2/sdk/config/configurator/core.hpp>
 
-namespace nt2{ namespace config {
+namespace nt2 { namespace config {
 
 bool is_multithreaded(void)
 {

@@ -9,7 +9,7 @@
 #include <nt2/sdk/config/configurator/cache.hpp>
 
 
-namespace nt2{ namespace config {
+namespace nt2 { namespace config {
 
 
 
