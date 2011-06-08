@@ -6,13 +6,19 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_FORWARD_HPP_INCLUDED
-#define NT2_ARCH_FORWARD_HPP_INCLUDED
+#ifndef NT2_ARCH_TRIPLETS_DEFAULT_ARCH_POWERPC_HPP_INCLUDED
+#define NT2_ARCH_TRIPLETS_DEFAULT_ARCH_POWERPC_HPP_INCLUDED
 
-// Needs to find a way to select the current arch concept
+#if !defined(NT2_ARCH)
+  #if   defined(__powerpc)    || defined(__powerpc__) \
+    ||  defined(__POWERPC__)  || defined(__ppc__)     \
+    ||  defined(_M_PPC)       || defined(_ARCH_PPC)   \
+    ||  defined(DOXYGEN_ONLY)
 
-#include <nt2/arch/concepts/default.hpp>
-#include <nt2/arch/concepts/generate.hpp>
-#include <nt2/arch/concepts/fetch.hpp>
+    #define NT2_ARCH_POWERPC
+    #define NT2_ARCH "Power PC"
+    #define NT2_ARCH_ALIGNMENT 16
 
+  #endif
+#endif
 #endif

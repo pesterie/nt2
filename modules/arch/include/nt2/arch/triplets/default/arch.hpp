@@ -6,13 +6,13 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_FORWARD_HPP_INCLUDED
-#define NT2_ARCH_FORWARD_HPP_INCLUDED
+#ifndef NT2_ARCH_TRIPLETS_DEFAULT_ARCH_HPP_INCLUDED
+#define NT2_ARCH_TRIPLETS_DEFAULT_ARCH_HPP_INCLUDED
 
-// Needs to find a way to select the current arch concept
-
-#include <nt2/arch/concepts/default.hpp>
-#include <nt2/arch/concepts/generate.hpp>
-#include <nt2/arch/concepts/fetch.hpp>
+#include <nt2/arch/triplets/default/arch/ia64.hpp>
+#include <nt2/arch/triplets/default/arch/none.hpp>
+#include <nt2/arch/triplets/default/arch/powerpc.hpp>
+#include <nt2/arch/triplets/default/arch/report.hpp>
+#include <nt2/arch/triplets/default/arch/x86.hpp>
 
 #endif

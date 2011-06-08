@@ -6,13 +6,17 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_FORWARD_HPP_INCLUDED
-#define NT2_ARCH_FORWARD_HPP_INCLUDED
+#ifndef NT2_ARCH_TRIPLETS_DEFAULT_OS_NIX_HPP_INCLUDED
+#define NT2_ARCH_TRIPLETS_DEFAULT_OS_NIX_HPP_INCLUDED
 
-// Needs to find a way to select the current arch concept
+#if !defined(NT2_OS)
+  #if     defined(linux)      ||  defined(__linux)                          \
+      ||  defined(__linux__)  ||  defined(__unix)  || defined(DOXYGEN_ONLY) \
 
-#include <nt2/arch/concepts/default.hpp>
-#include <nt2/arch/concepts/generate.hpp>
-#include <nt2/arch/concepts/fetch.hpp>
+    #define NT2_OS_LINUX
+    #define NT2_OS BOOST_PLATFORM
+
+  #endif
+#endif
 
 #endif
