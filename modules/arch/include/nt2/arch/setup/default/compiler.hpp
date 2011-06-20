@@ -16,12 +16,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <boost/config.hpp>
 #include <boost/version.hpp>
-#include <nt2/sdk/config/bootstrap.hpp>
+#include <nt2/arch/concepts/default.hpp>
 
-#include <nt2/sdk/config/compiler/gcc_xml.hpp>
-#include <nt2/extension/sdk/config/compiler.hpp>
-#include <nt2/sdk/config/compiler/gcc.hpp>
-#include <nt2/sdk/config/compiler/visualc.hpp>
-#include <nt2/sdk/config/compiler/none.hpp>
+#include <nt2/arch/setup/default/compiler/gcc_xml.hpp>
+#include <nt2/arch/setup/default/compiler/gcc.hpp>
+#include <nt2/arch/setup/default/compiler/visualc.hpp>
+#include <nt2/arch/setup/default/compiler/none.hpp>
 
 #endif

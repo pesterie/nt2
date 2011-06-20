@@ -9,14 +9,26 @@
 
 include(NT2Module)
 nt2_module_source_setup(config)
-#nt2_module_configure_toolbox(config 0)
 
 ################################################################################
 # Generate bootstrap.hpp
 ################################################################################
-nt2_module_configure_file(bootstrap.hpp.cmake
-                          nt2/sdk/config/bootstrap.hpp
-                         )
+
+# nt2_module_configure_file(bootstrap.hpp.cmake
+#                           nt2/sdk/config/bootstrap.hpp
+#                          )
+
+################################################################################
+# Generate infos.hpp for configurator
+################################################################################
+
+set(NT2_CONCEPT_GENERATE_PATH ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/generate/)
+set(NT2_CONCEPT_DEFAULT_PATH ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/default/)
+
+# This file does not need to be install.
+configure_file(infos.hpp.cmake 
+               ${PROJECT_BINARY_DIR}/include/nt2/sdk/config/infos.hpp
+              )
 
 file( GLOB_RECURSE source_config_files
       ${NT2_CONFIG_ROOT}/src/*
@@ -25,31 +37,75 @@ file( GLOB_RECURSE source_config_files
 SET(SOURCE_FILES ${source_config_files} CACHE INTERNAL "")
 
 
+################################################################################
+# Generate nt2.configurator.cmake for configurator
+################################################################################
 
-if(NT2_CUSTOM_CONFIGURATION)
+#if(NT2_CUSTOM_CONFIGURATION)
 
-include(FindHWLOC)
-find_library(BOOST_PROGRAM_OPT_STATIC libboost_program_options.a  ${Boost_LIBRARIES}) 
-find_library(BOOST_PROGRAM_OPT_SHARED libboost_program_options.so ${Boost_LIBRARIES}) 
-if(BOOST_PROGRAM_OPT_STATIC)
-  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_STATIC})
-elseif(BOOST_PROGRAM_OPT_SHARED)
-  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_SHARED})
-else()
-  message("Boost Program Options library can not be")
-endif()
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/configurator)
+set(CONFIGURATOR_BUILD_DIR ${PROJECT_BINARY_DIR}/build_configurator)
 
-file( GLOB_RECURSE source_configurator_files
-      ${NT2_CONFIG_ROOT}/src/configurator/*
+# This file does not need to be install.
+set(NT2_CONFIGURATOR_CMAKE_FILE ${CONFIGURATOR_BUILD_DIR}/cmake/nt2.configurator.cmake)
+
+file(WRITE ${NT2_CONFIGURATOR_CMAKE_FILE}
+"################################################################################
+#         Copyright 2003 & onward LASMEA UMR 6602 CNRS/Univ. Clermont II
+#         Copyright 2009 & onward LRI    UMR 8623 CNRS/Univ Paris Sud XI
+#
+#          Distributed under the Boost Software License, Version 1.0.
+#                 See accompanying file LICENSE.txt or copy at
+#                     http://www.boost.org/LICENSE_1_0.txt
+################################################################################\n"
     )
 
-add_executable(configure EXCLUDE_FROM_ALL ${source_configurator_files} )
-set_property(TARGET configure PROPERTY 
-             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-             )
-set_property(TARGET configure PROPERTY 
-             OUTPUT_NAME "configure.run" 
-             )
-target_link_libraries(configure ${BOOST_PROGRAM_OPT})
+set(FORWARD_INCLUDE ${NT2_CONFIG_DEPENDENCIES_INCLUDE_DIR} ${NT2_CONFIG_INCLUDE_DIR})
+string(REPLACE ";" " " FORWARD_INCLUDE_TO_WRITE "${FORWARD_INCLUDE}")
 
-endif()
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_CONFIGURATOR_INCLUDE_DIR ${FORWARD_INCLUDE_TO_WRITE})\n"
+    )
+
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_CONFIGURATOR_LYBRARY_DIR ${NT2_CONFIG_DEPENDENCIES_LIBRARY_DIR})\n"
+    )
+
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_CONFIGURATOR_BUILD_DIR ${CONFIGURATOR_BUILD_DIR})\n"
+    )
+
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_BUILD_DIR ${PROJECT_BINARY_DIR})\n"
+    )
+
+################################################################################
+# Configurator for fine grain configuration 
+################################################################################
+
+message(STATUS "Generating Makefile system for Configurator...")
+
+execute_process(COMMAND ${CMAKE_COMMAND} ${NT2_CONFIG_ROOT}/src/configurator/
+                WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
+                RESULT_VARIABLE CMAKE_RESULT
+               )
+
+message(STATUS "Compiling Configurator...")
+
+execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} configure
+                WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
+                RESULT_VARIABLE BUILD_RESULT
+               )
+
+# set(RUN_COMMAND bash)
+
+# execute_process(COMMAND bash -c ${CONFIGURATOR_BUILD_DIR}/configure.run --runtime_gen
+#                 WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
+#                 RESULT_VARIABLE RUN_RESULT
+#                 OUTPUT_VARIABLE CONFIGURATOR_OUTPUT
+#                 )
+
+# message("${RUN_RESULT}")
+# message("${CONFIGURATOR_OUTPUT}")
+
+#endif()

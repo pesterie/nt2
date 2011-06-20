@@ -15,10 +15,14 @@
 #include <nt2/sdk/config/configurator/utils.hpp>
 #include <nt2/sdk/config/configurator/core.hpp>
 #include <nt2/sdk/config/configurator/simd.hpp>
+#include <nt2/sdk/config/configurator/header.hpp>
+#include <nt2/sdk/config/infos.hpp>
 #include <iterator>
 #include <cassert>
+#include <cctype>
 
 namespace po = boost::program_options;
+namespace cf = nt2::config;
 using namespace std;
 void test(void);
 
@@ -33,19 +37,57 @@ int main(int ac, char *av[])
     
     po::options_description desc("Configurator options");
     desc.add_options()
-      ("runtime_test", "Test your hardware specification")
+      ("runtime_gen", "Test your hardware specifications and display the result")
+      ("runtime_gen", "Test your hardware specifications and generate the Architecture Concept")
+      ("hwloc_gen"  , "Test your hardware specifications with HWLOC and generate the Architecture Concept")
+      ("manual_gen" , "Manuel genration of the Architecture Concept")
+      ("default"    , "Default generation of bootstrap")
+      ("help"       , "Start help")
       ;
     
     po::variables_map vm;        
     po::store(po::parse_command_line(ac, av, desc), vm);
     po::notify(vm);    
 
-    if (vm.count("runtime_test")) {
+    if(vm.count("runtime_test")) 
+    {
       test();
       return 1;
     }
+    else if(vm.count("hwloc_gen"))
+    {
+      // TODO
+    }
+    else if(vm.count("manual_gen"))
+    {
+      // TODO
+    }
+    else if(vm.count("default"))
+    {
+      cf::utils::header bootstrap;
+      bootstrap.init(NT2_CONCEPT_DEFAULT_PATH, "bootstrap.hpp");
+
+      boost::array<const std::string,9> ext = {{"sse","sse2","sse3","ssse3","sse4.1","sse4.2","avx","xop","fma4"}};
+      boost::array<const std::string,9> EXT = {{"NT2_HAS_SSE_SUPPORT","NT2_HAS_SSE2_SUPPORT","NT2_HAS_SSE3_SUPPORT",
+                                                "NT2_HAS_SSSE3_SUPPORT","NT2_HAS_SSE4_1_SUPPORT","NT2_HAS_SSE4_2_SUPPORT",
+                                                "NT2_HAS_AVX_SUPPORT","NT2_HAS_XOP_SUPPORT","NT2_HAS_FMA4_SUPPORT"}};
+      for(int i = 0; i < 9; ++i)
+      {
+        if (nt2::config::has_vectorial_extension(ext[i]))
+        {
+          bootstrap.add_macro(EXT[i], "");
+        }
+      }
+
+      bootstrap.add_macro("NT2_HAS_DEFAULT_CONCEPT", "");
+      bootstrap.close();
+    }
+    else if(vm.count("help"))
+    {
+      cout << "TODO : Write help.\n";
+    }
     else {
-      cout << "Add option --runtime_test to test runtime configuration functions\n";
+      cout << "Add option --help for more infos about the configurator.\n";
     }
   }
   catch(exception& e) {
@@ -55,7 +97,7 @@ int main(int ac, char *av[])
   catch(...) {
     cerr << "Exception of unknown type!\n";
   }
-  
+
   return 0;
 }
 

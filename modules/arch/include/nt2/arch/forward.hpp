@@ -12,7 +12,7 @@
 // Needs to find a way to select the current arch concept
 
 #include <nt2/arch/concepts/default.hpp>
-#include <nt2/arch/concepts/generate.hpp>
-#include <nt2/arch/concepts/fetch.hpp>
+//#include <nt2/arch/concepts/generate.hpp>
+//#include <nt2/arch/concepts/fetch.hpp>
 
 #endif

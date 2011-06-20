@@ -17,12 +17,11 @@
 
 #include <boost/config.hpp>
 #include <boost/version.hpp>
-#include <nt2/sdk/config/bootstrap.hpp>
+#include <nt2/arch/concepts/default.hpp>
 
-#include <nt2/extension/sdk/config/os.hpp>
-#include <nt2/sdk/config/os/nix.hpp>
-#include <nt2/sdk/config/os/windows.hpp>
-#include <nt2/sdk/config/os/macos.hpp>
-#include <nt2/sdk/config/os/none.hpp>
+#include <nt2/arch/setup/default/os/nix.hpp>
+#include <nt2/arch/setup/default/os/windows.hpp>
+#include <nt2/arch/setup/default/os/macos.hpp>
+#include <nt2/arch/setup/default/os/none.hpp>
 
 #endif
