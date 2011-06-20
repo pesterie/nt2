@@ -54,7 +54,7 @@ build
 ################################################################################
 # Ignore local bootstrap file
 ################################################################################
-include/nt2/sdk/config/bootstrap.hpp
+modules/arch/include/nt2/arch/concepts/default/bootstrap.hpp
 
 ################################################################################
 # Ignore buidl files and python compilation
