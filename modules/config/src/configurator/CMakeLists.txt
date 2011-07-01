@@ -34,6 +34,11 @@ else()
   message(STATUS "Boost Program Options library can not be found.")
 endif()
 
+# This file does not need to be install.
+configure_file(${PROJECT_SOURCE_DIR}/cmake/infos.hpp.cmake 
+               ${NT2_BUILD_DIR}/include/nt2/sdk/config/infos.hpp
+              )
+
 file( GLOB_RECURSE source_configurator_files
       ${PROJECT_SOURCE_DIR}/*
     )

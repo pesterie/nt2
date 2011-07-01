@@ -23,4 +23,11 @@ IF(Threads_FOUND)
 SET(NT2_HAS_THREADS_SUPPORT 1)
 ENDIF(Threads_FOUND)
 
+################################################################################
+# Find TBB and set proper flags for nt2
+################################################################################
+# TODO : Write TBB find
+IF(Threads_FOUND)
+SET(NT2_HAS_TBB_SUPPORT 1)
+ENDIF(Threads_FOUND)
 

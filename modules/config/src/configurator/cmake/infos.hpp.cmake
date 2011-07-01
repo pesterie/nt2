@@ -9,16 +9,16 @@
 #ifndef NT2_SDK_CONFIG_CONFIGURATOR_INFOS_HPP_INCLUDED
 #define NT2_SDK_CONFIG_CONFIGURATOR_INFOS_HPP_INCLUDED
 
-#cmakedefine NT2_CONCEPT_GENERATE_PATH "${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/generate/"
-#cmakedefine NT2_CONCEPT_DEFAULT_PATH "${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/default/"
+#cmakedefine NT2_CONCEPT_GENERATE_PATH "${NT2_CONCEPT_GENERATE_PATH}"
+#cmakedefine NT2_CONCEPT_DEFAULT_PATH  "${NT2_CONCEPT_DEFAULT_PATH}"
 
-#cmakedefine NT2_HAS_CUDA
-#cmakedefine NT2_HAS_OCL
-#cmakedefine NT2_HAS_OMP
-#cmakedefine NT2_HAS_PTH
-#cmakedefine NT2_HAS_TBB
-#cmakedefine NT2_HAS_MPI
-#cmakedefine NT2_HAS_PLX
-#cmakedefine NT2_HAS_HWL
+#cmakedefine NT2_HAS_CUDA_SUPPORT
+#cmakedefine NT2_HAS_OPENCL_SUPPORT
+#cmakedefine NT2_HAS_OPENMP_SUPPORT
+#cmakedefine NT2_HAS_THREADS_SUPPORT
+#cmakedefine NT2_HAS_TBB_SUPPORT
+#cmakedefine NT2_HAS_MPI_SUPPORT
+#cmakedefine NT2_HAS_PLX_SUPPORT
+#cmakedefine NT2_HAS_HWL_SUPPORT
 
 #endif

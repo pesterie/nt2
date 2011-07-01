@@ -10,26 +10,6 @@
 include(NT2Module)
 nt2_module_source_setup(config)
 
-################################################################################
-# Generate bootstrap.hpp
-################################################################################
-
-# nt2_module_configure_file(bootstrap.hpp.cmake
-#                           nt2/sdk/config/bootstrap.hpp
-#                          )
-
-################################################################################
-# Generate infos.hpp for configurator
-################################################################################
-
-set(NT2_CONCEPT_GENERATE_PATH ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/generate/)
-set(NT2_CONCEPT_DEFAULT_PATH ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/default/)
-
-# This file does not need to be install.
-configure_file(infos.hpp.cmake 
-               ${PROJECT_BINARY_DIR}/include/nt2/sdk/config/infos.hpp
-              )
-
 file( GLOB_RECURSE source_config_files
       ${NT2_CONFIG_ROOT}/src/*
     )
@@ -41,13 +21,13 @@ SET(SOURCE_FILES ${source_config_files} CACHE INTERNAL "")
 # Generate nt2.configurator.cmake for configurator
 ################################################################################
 
-#if(NT2_CUSTOM_CONFIGURATION)
-
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/configurator)
 set(CONFIGURATOR_BUILD_DIR ${PROJECT_BINARY_DIR}/build_configurator)
 
 # This file does not need to be install.
 set(NT2_CONFIGURATOR_CMAKE_FILE ${CONFIGURATOR_BUILD_DIR}/cmake/nt2.configurator.cmake)
+set(NT2_CONCEPT_GENERATE_PATH_ ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/generate/)
+set(NT2_CONCEPT_DEFAULT_PATH_ ${PROJECT_SOURCE_DIR}/modules/arch/include/nt2/arch/concepts/default/)
 
 file(WRITE ${NT2_CONFIGURATOR_CMAKE_FILE}
 "################################################################################
@@ -79,6 +59,14 @@ file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
      "set(NT2_BUILD_DIR ${PROJECT_BINARY_DIR})\n"
     )
 
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_CONCEPT_GENERATE_PATH ${NT2_CONCEPT_GENERATE_PATH_})\n"
+    )
+
+file(APPEND ${NT2_CONFIGURATOR_CMAKE_FILE}
+     "set(NT2_CONCEPT_DEFAULT_PATH ${NT2_CONCEPT_DEFAULT_PATH_})\n"
+    )
+
 ################################################################################
 # Configurator for fine grain configuration 
 ################################################################################
@@ -97,15 +85,3 @@ execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} configure
                 RESULT_VARIABLE BUILD_RESULT
                )
 
-# set(RUN_COMMAND bash)
-
-# execute_process(COMMAND bash -c ${CONFIGURATOR_BUILD_DIR}/configure.run --runtime_gen
-#                 WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
-#                 RESULT_VARIABLE RUN_RESULT
-#                 OUTPUT_VARIABLE CONFIGURATOR_OUTPUT
-#                 )
-
-# message("${RUN_RESULT}")
-# message("${CONFIGURATOR_OUTPUT}")
-
-#endif()

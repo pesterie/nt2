@@ -6,3 +6,19 @@
 #                 See accompanying file LICENSE.txt or copy at
 #                     http://www.boost.org/LICENSE_1_0.txt
 ################################################################################
+
+################################################################################
+# Find CUDA and set proper flags for nt2
+################################################################################
+include(FindCUDA)
+IF(CUDA_FOUND)
+SET(NT2_HAS_CUDA_SUPPORT 1)
+ENDIF(CUDA_FOUND)
+
+################################################################################
+# Find OpenCL and set proper flags for nt2
+################################################################################
+# TODO : Write OpenCL find
+IF(OCL_FOUND)
+SET(NT2_HAS_OPENCL_SUPPORT 1)
+ENDIF(OCL_FOUND)
