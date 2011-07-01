@@ -113,13 +113,14 @@ namespace nt2 { namespace config { namespace utils {
           add_include("boost/mpl/int.hpp");
           add_newline();
           h << "struct arch\n{\n";
+
           //generate metafunctions and runtime functions
           
           int j = 0;
           for (int i = 0; i < functions.size(); ++i)
           {
-            h << "  typedef boost::mpl::int_<" << functions[i].value  << "> " << functions[i].lower << ";\n";
-            h << "  int get_" << functions[i].lower << "(void) { return " << functions[i].upper << "; }\n"; 
+            h << "  typedef boost::mpl::int_<" << functions[i].upper  << "> " << functions[i].lower << ";\n";
+            h << "  int get_" << functions[i].lower << "(void) { return " << functions[i].lower << "(); }\n"; 
           }
           h << "}\n";
           add_newline();

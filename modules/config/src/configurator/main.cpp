@@ -54,7 +54,7 @@ int main(int ac, char *av[])
     if(vm.count("runtime_gen")) 
     {
       // Detecting SIMD extensions
-      cf::utils::header runtime_concept(NT2_CONCEPT_GENERATE_PATH, "runtime_concept.hpp");
+      cf::utils::header runtime_concept(NT2_CONCEPT_GENERATE_PATH, "runtime_detection.hpp");
 
       // Detecting SIMD extensions
       for(int i = 0; i < 9; ++i)
