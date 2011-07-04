@@ -51,7 +51,7 @@ namespace nt2 { namespace config { namespace utils {
       {
         if(h.is_open() == true) 
         {
-          h << "#define " << name << "\n"; 
+          h << "#define NT2_" << name << "\n"; 
           return 0;
         }
         else return 1;
@@ -81,7 +81,7 @@ namespace nt2 { namespace config { namespace utils {
       {
         if(h.is_open() == true) 
         {
-          h << "#define " << name << " " << value << "\n"; 
+          h << "#define NT2_" << name << " " << value << "\n"; 
           add_function(name, value);
           return 0;
         }
@@ -92,7 +92,7 @@ namespace nt2 { namespace config { namespace utils {
       {
         if(h.is_open() == true) 
         {
-          h << "#define " << name << " " << value << "\n";
+          h << "#define NT2_" << name << " " << value << "\n";
           add_function(name, value);
           return 0;
         }
@@ -112,6 +112,7 @@ namespace nt2 { namespace config { namespace utils {
           add_newline();
           add_include("boost/mpl/int.hpp");
           add_newline();
+          h << "namespace nt2 { namespace arch {\n\n";
           h << "struct arch\n{\n";
 
           //generate metafunctions and runtime functions
@@ -124,6 +125,7 @@ namespace nt2 { namespace config { namespace utils {
           }
           h << "}\n";
           add_newline();
+          h << "} }\n";
           return 0;
         }
         else return 1;

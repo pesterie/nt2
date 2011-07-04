@@ -47,9 +47,9 @@ int main(int ac, char *av[])
     po::notify(vm);  
   
     boost::array<const std::string,9> ext = {{"sse","sse2","sse3","ssse3","sse4.1","sse4.2","avx","xop","fma4"}};
-    boost::array<const std::string,9> EXT = {{"NT2_HAS_SSE_SUPPORT","NT2_HAS_SSE2_SUPPORT","NT2_HAS_SSE3_SUPPORT",
-                                              "NT2_HAS_SSSE3_SUPPORT","NT2_HAS_SSE4_1_SUPPORT","NT2_HAS_SSE4_2_SUPPORT",
-                                              "NT2_HAS_AVX_SUPPORT","NT2_HAS_XOP_SUPPORT","NT2_HAS_FMA4_SUPPORT"}};
+    boost::array<const std::string,9> EXT = {{"HAS_SSE_SUPPORT","HAS_SSE2_SUPPORT","HAS_SSE3_SUPPORT",
+                                              "HAS_SSSE3_SUPPORT","HAS_SSE4_1_SUPPORT","HAS_SSE4_2_SUPPORT",
+                                              "HAS_AVX_SUPPORT","HAS_XOP_SUPPORT","HAS_FMA4_SUPPORT"}};
 
     if(vm.count("runtime_gen")) 
     {
@@ -66,18 +66,20 @@ int main(int ac, char *av[])
       }
    
       int nb_cores = nt2::config::get_threads();
-      if(nb_cores > 0) runtime_concept.add_macro("NT2_NB_CORES", nb_cores);
+      if(nb_cores > 0) runtime_concept.add_macro("NB_CORES", nb_cores);
       int nb_logical_cores_per_unit = nt2::config::get_logical_cores();
-      if(nb_logical_cores_per_unit > 0) runtime_concept.add_macro("NT2_NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
+      if(nb_logical_cores_per_unit > 0) runtime_concept.add_macro("NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
       int nb_physical_cores = nt2::config::get_physical_cores();
-      if(nb_physical_cores > 0) runtime_concept.add_macro("NT2_NB_PHYSICAL_CORES", nb_physical_cores);
+      if(nb_physical_cores > 0) runtime_concept.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
 
-      // nt2::config::cache_report cache;
-      // nt2::config::get_cache_infos(cache);
-      // int coh = nt2::config::get_cache_coherency_line_size(cache);
+      nt2::config::cache_report cache;
+      nt2::config::get_cache_infos(cache);
+      if(nb_physical_cores > 0) runtime_concept.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
+
+      int coh = nt2::config::get_cache_coherency_line_size(cache);
       
 
-      runtime_concept.add_define("NT2_HAS_RUNTIME_GEN_CONCEPT");
+      runtime_concept.add_define("HAS_RUNTIME_GEN_CONCEPT");
       runtime_concept.generate_class();
     }
     else if(vm.count("manual_gen"))
@@ -97,7 +99,7 @@ int main(int ac, char *av[])
         }
       }
 
-      bootstrap.add_define("NT2_HAS_DEFAULT_CONCEPT");
+      bootstrap.add_define("HAS_DEFAULT_CONCEPT");
     }
     else if(vm.count("help"))
     {
