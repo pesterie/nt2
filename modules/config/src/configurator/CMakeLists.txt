@@ -16,10 +16,6 @@ set(CMAKE_MODULE_PATH
    )
 
 include(nt2.configurator)
-include(nt2.hwloc)
-include(nt2.gpu)
-include(nt2.threading)
-include(nt2.mpi)
 
 include_directories(${NT2_CONFIGURATOR_INCLUDE_DIR})
 
@@ -27,17 +23,20 @@ find_library(BOOST_PROGRAM_OPT_STATIC libboost_program_options.a  ${NT2_CONFIGUR
 find_library(BOOST_PROGRAM_OPT_SHARED libboost_program_options.so ${NT2_CONFIGURATOR_LYBRARY_DIR}) 
 
 if(BOOST_PROGRAM_OPT_STATIC)
-  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_STATIC})
+  set(LIBRARIES_TO_LINK ${BOOST_PROGRAM_OPT_STATIC})
 elseif(BOOST_PROGRAM_OPT_SHARED)
-  set(BOOST_PROGRAM_OPT ${BOOST_PROGRAM_OPT_SHARED})
+  set(LIBRARIES_TO_LINK ${BOOST_PROGRAM_OPT_SHARED})
 else()
   message(STATUS "Boost Program Options library can not be found.")
 endif()
 
-# This file does not need to be install.
-configure_file(${PROJECT_SOURCE_DIR}/cmake/infos.hpp.cmake 
-               ${NT2_BUILD_DIR}/include/nt2/sdk/config/infos.hpp
-              )
+if(CUDA_FOUND)
+  if(NT2_CUDA_LIB)
+    set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_CUDA_LIB})
+  else()
+    message(SEND_ERROR "Can't find CUDA library !")
+  endif()
+endif()
 
 file( GLOB_RECURSE source_configurator_files
       ${PROJECT_SOURCE_DIR}/*
@@ -52,4 +51,6 @@ set_property(TARGET configure PROPERTY
              OUTPUT_NAME "configure.run" 
              )
 
-target_link_libraries(configure ${BOOST_PROGRAM_OPT})
+message("${LIBRARIES_TO_LINK}")
+
+target_link_libraries(configure ${LIBRARIES_TO_LINK})

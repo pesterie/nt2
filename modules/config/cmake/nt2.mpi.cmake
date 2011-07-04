@@ -8,17 +8,14 @@
 ################################################################################
 
 ################################################################################
-# Find CUDA and set proper flags for nt2
+# Find abotu MPI
 ################################################################################
-include(FindCUDA)
-IF(CUDA_FOUND)
-SET(NT2_HAS_CUDA_SUPPORT 1)
-ENDIF(CUDA_FOUND)
 
-################################################################################
-# Find OpenCL and set proper flags for nt2
-################################################################################
-# TODO : Write OpenCL find
-IF(OCL_FOUND)
-SET(NT2_HAS_OPENCL_SUPPORT 1)
-ENDIF(OCL_FOUND)
+include(FindMPI)
+
+IF(MPI_FOUND)
+SET(NT2_HAS_MPI_SUPPORT 1)
+SET(CONFIGURATOR_LIBRARIES ${CONFIGURATOR_LIBRARIES} ${MPI_LIBRARIES})
+SET(CONFIGURATOR_INCLUDES ${CONFIGURATOR_INCLUDES} ${MPI_INCLUDE_PATH})
+ENDIF(MPI_FOUND)
+

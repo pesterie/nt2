@@ -21,6 +21,10 @@
 #include <cassert>
 #include <cctype>
 
+#if defined(NT2_HAS_CUDA_SUPPORT) || defined(NT2_HAS_OPENCL_SUPPORT) 
+#include <nt2/sdk/config/configurator/gpu.hpp>      
+#endif      
+
 namespace po = boost::program_options;
 namespace cf = nt2::config;
 using namespace std;
@@ -29,7 +33,6 @@ using namespace std;
 // Entry point for the configurator
 // Documentation: http://nt2.lri.fr/sdk/configurator.html
 ////////////////////////////////////////////////////////////////////////////////
-
 int main(int ac, char *av[])
 {
   try {
@@ -74,10 +77,20 @@ int main(int ac, char *av[])
 
       nt2::config::cache_report cache;
       nt2::config::get_cache_infos(cache);
-      if(nb_physical_cores > 0) runtime_concept.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
-
+      if(cache.L1 > 0) runtime_concept.add_macro("L1_CACHE_SIZE", cache.L1);
+      if(cache.L2 > 0) runtime_concept.add_macro("L2_CACHE_SIZE", cache.L2);
+      if(cache.L3 > 0) runtime_concept.add_macro("L3_CACHE_SIZE", cache.L3);
+      if(cache.l1 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l1);
+      if(cache.l2 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l2);
+      if(cache.l3 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l3);
       int coh = nt2::config::get_cache_coherency_line_size(cache);
-      
+      if(coh > 0) runtime_concept.add_macro("COHERENCY_LINE_SIZE", coh);
+
+
+#ifdef NT2_HAS_CUDA_SUPPORT
+      nt2::config::gpu_report gpu;
+      int cuda_result = get_cuda_devices_properties(gpu);
+#endif      
 
       runtime_concept.add_define("HAS_RUNTIME_GEN_CONCEPT");
       runtime_concept.generate_class();
