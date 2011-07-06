@@ -19,17 +19,13 @@ include(nt2.configurator)
 
 include_directories(${NT2_CONFIGURATOR_INCLUDE_DIR})
 
-find_library(BOOST_PROGRAM_OPT_STATIC libboost_program_options.a  ${NT2_CONFIGURATOR_LYBRARY_DIR}) 
-find_library(BOOST_PROGRAM_OPT_SHARED libboost_program_options.so ${NT2_CONFIGURATOR_LYBRARY_DIR}) 
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost 1.46.0 COMPONENTS program_options REQUIRED)
 
-if(BOOST_PROGRAM_OPT_STATIC)
-  set(LIBRARIES_TO_LINK ${BOOST_PROGRAM_OPT_STATIC})
-elseif(BOOST_PROGRAM_OPT_SHARED)
-  set(LIBRARIES_TO_LINK ${BOOST_PROGRAM_OPT_SHARED})
-else()
-  message(STATUS "Boost Program Options library can not be found.")
+if(Boost_PROGRAM_OPTIONS_LIBRARY)
+set(LIBRARIES_TO_LINK ${Boost_PROGRAM_OPTIONS_LIBRARY})
 endif()
-
+ 
 if(CUDA_FOUND)
   if(NT2_CUDA_LIB)
     set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_CUDA_LIB})
@@ -50,7 +46,5 @@ set_property(TARGET configure PROPERTY
 set_property(TARGET configure PROPERTY 
              OUTPUT_NAME "configure.run" 
              )
-
-message("${LIBRARIES_TO_LINK}")
 
 target_link_libraries(configure ${LIBRARIES_TO_LINK})

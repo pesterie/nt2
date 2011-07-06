@@ -16,14 +16,11 @@
 #include <nt2/sdk/config/configurator/core.hpp>
 #include <nt2/sdk/config/configurator/simd.hpp>
 #include <nt2/sdk/config/configurator/header.hpp>
+#include <nt2/sdk/config/configurator/gpu.hpp>      
 #include <nt2/sdk/config/infos.hpp>
 #include <iterator>
 #include <cassert>
 #include <cctype>
-
-#if defined(NT2_HAS_CUDA_SUPPORT) || defined(NT2_HAS_OPENCL_SUPPORT) 
-#include <nt2/sdk/config/configurator/gpu.hpp>      
-#endif      
 
 namespace po = boost::program_options;
 namespace cf = nt2::config;
@@ -60,37 +57,96 @@ int main(int ac, char *av[])
       cf::utils::header runtime_concept(NT2_CONCEPT_GENERATE_PATH, "runtime_detection.hpp");
 
       // Detecting SIMD extensions
+      std::cout << "Testing SIMD extensions available...\n";
       for(int i = 0; i < 9; ++i)
       {
         if (nt2::config::has_vectorial_extension(ext[i]))
         {
+	  std::cout << "-- " << ext[i] << " -> Success\n";
           runtime_concept.add_define(EXT[i]);
         }
+	else std::cerr << "-- " << ext[i] << " -> Fail\n";
       }
    
+      // Detecting Multicore capabilities
+      std::cout << "Detecting Multithreading capabilities...\n";
       int nb_cores = nt2::config::get_threads();
-      if(nb_cores > 0) runtime_concept.add_macro("NB_CORES", nb_cores);
+      if(nb_cores > 0) 
+      {
+	runtime_concept.add_macro("NB_CORES", nb_cores);
+	std::cout << "-- Total cores found (Logical and Physical) : " << nb_cores << "\n";
+      }
+      else std::cerr << "-- Not a multicore architecture (Core test failed).\n";
+
       int nb_logical_cores_per_unit = nt2::config::get_logical_cores();
-      if(nb_logical_cores_per_unit > 0) runtime_concept.add_macro("NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
+      if(nb_logical_cores_per_unit > 0) 
+      {
+	runtime_concept.add_macro("NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
+      	std::cout << "-- Logical cores per unit found : " << nb_logical_cores_per_unit << "\n";
+      }
+      else std::cerr << "-- Not a multicore architecture (Logical Core test failed).\n";
+
+
       int nb_physical_cores = nt2::config::get_physical_cores();
-      if(nb_physical_cores > 0) runtime_concept.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
+      if(nb_physical_cores > 0) 
+      {
+	runtime_concept.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
+	std::cout << "-- Physical cores found : " << nb_physical_cores << "\n";
+      }
+      else std::cerr << "-- Not a multicore architecture (Physical Core test failed).\n";
 
+      // Getting cache specs
       nt2::config::cache_report cache;
-      nt2::config::get_cache_infos(cache);
-      if(cache.L1 > 0) runtime_concept.add_macro("L1_CACHE_SIZE", cache.L1);
-      if(cache.L2 > 0) runtime_concept.add_macro("L2_CACHE_SIZE", cache.L2);
-      if(cache.L3 > 0) runtime_concept.add_macro("L3_CACHE_SIZE", cache.L3);
-      if(cache.l1 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l1);
-      if(cache.l2 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l2);
-      if(cache.l3 > 0) runtime_concept.add_macro("L1_LINE_SIZE",  cache.l3);
-      int coh = nt2::config::get_cache_coherency_line_size(cache);
-      if(coh > 0) runtime_concept.add_macro("COHERENCY_LINE_SIZE", coh);
+      std::cout << "Detecting cache specifications...\n";
+      if( nt2::config::get_cache_infos(cache) == 0)
+      {
+	if(cache.L1 > 0) 
+	{
+	  runtime_concept.add_macro("L1_CACHE_SIZE", cache.L1);
+	  std::cout << "-- L1 cache size : " << cache.L1 << " kB\n";
+	}
+	if(cache.L2 > 0) 
+	{  
+	  runtime_concept.add_macro("L2_CACHE_SIZE", cache.L2);
+	  std::cout << "-- L2 cache size : " << cache.L2 << " kB\n";
+	}
+	if(cache.L3 > 0) 
+	{
+	  runtime_concept.add_macro("L3_CACHE_SIZE", cache.L3);
+	  std::cout << "-- L3 cache size : " << cache.L3 << " kB\n";
+	}
+	if(cache.l1 > 0)
+	{
+	  runtime_concept.add_macro("L1_LINE_SIZE",  cache.l1);
+	  std::cout << "-- L1 cache line size : " << cache.l1 << " bytes\n";
+	}
+	if(cache.l2 > 0) 
+	{ 
+	  runtime_concept.add_macro("L1_LINE_SIZE",  cache.l2);
+	  std::cout << "-- L2 cache line size : " << cache.l2 << " bytes\n";
+	}
+	if(cache.l3 > 0) 
+	{  
+	  runtime_concept.add_macro("L1_LINE_SIZE",  cache.l3);
+	  std::cout << "-- L3 cache line size : " << cache.l3 << " bytes\n";
+	}
 
+	int coh = nt2::config::get_cache_coherency_line_size(cache);
+	if(coh > 0) runtime_concept.add_macro("COHERENCY_LINE_SIZE", coh);
+      }
+      else std::cout << "-- Getting cache specifications failed.";
 
-#ifdef NT2_HAS_CUDA_SUPPORT
+      std::cout << "Detecting GPU devices specifications...\n";
       nt2::config::gpu_report gpu;
-      int cuda_result = get_cuda_devices_properties(gpu);
-#endif      
+      int result = nt2::config::get_gpu_devices_properties(gpu);
+      if(gpu.size() != 0) 
+      {
+	for(int idx = 0; idx < gpu.size(); ++idx)
+	{
+	  
+	}
+      }
+      else std::cerr << "No GPU Devices detected!\n";
 
       runtime_concept.add_define("HAS_RUNTIME_GEN_CONCEPT");
       runtime_concept.generate_class();

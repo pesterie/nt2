@@ -9,21 +9,38 @@
 #ifndef NT2_SDK_CONFIG_CONFIGURATOR_GPU_HPP
 #define NT2_SDK_CONFIG_CONFIGURATOR_GPU_HPP
 
+#include <nt2/sdk/config/infos.hpp>
+
+#ifdef NT2_HAS_CUDA_SUPPORT
 #include <cuda_runtime_api.h>
+#elif defined(NT2_HAS_OPENCL_SUPPORT)
+#include <cl.h>
+#endif
+
 #include <vector>
+#include <iostream>
 
 namespace nt2 { namespace config {
-    
-    typedef struct gpu_infos_
-    {
-      int max_threads_per_block;
-      //Add more properties
-    } gpu_infos;
 
+#ifdef NT2_HAS_CUDA_SUPPORT
+    
+    typedef cudaDeviceProp         gpu_infos;
     typedef std::vector<gpu_infos> gpu_report;
 
-    int get_cuda_devices_properties(gpu_report &gpu);
-    
+#elif defined(NT2_HAS_OPENCL_SUPPORT)
+
+#endif
+
+    // template<class T>
+    // inline int get_gpu_attribute(T* attribute, CUdevice_attribute da, int device)
+    // {
+    //   if(CUDA_SUCCESS == cuDeviceGetAttribute(attribute, da, device)) return 0;
+    //   else return -1;
+    // }
+
+    int get_gpu_devices_properties(gpu_report &gpu);
+    //void display_gpu_device_properties(gpu_infos const& device);    
+
 } }
 
 #endif /* NT2_SDK_CONFIG_CONFIGURATOR_GPU_HPP */

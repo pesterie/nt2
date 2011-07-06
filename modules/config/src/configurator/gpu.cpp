@@ -12,21 +12,32 @@
 
 namespace nt2 { namespace config {
 
-    int get_cuda_devices_properties(gpu_report &gpu)
+    int get_gpu_devices_properties(gpu_report &gpu)
     {
+
+#ifdef NT2_HAS_CUDA_SUPPORT
+
       int nb_devices = 0;
       cudaGetDeviceCount( &nb_devices );
-      cudaDeviceProp device_properties;
       gpu.resize(nb_devices);
+      std::cout << "Getting GPU devices specifications...\n";
       for(size_t device_idx =0; device_idx < nb_devices; ++device_idx)
       {
-	memset( &device_properties, 0, sizeof(cudaDeviceProp));
-	if(cudaSuccess == cudaGetDeviceProperties(&device_properties, device_idx))
+	memset( &gpu[device_idx], 0, sizeof(cudaDeviceProp));
+	if(cudaSuccess == cudaGetDeviceProperties(&gpu[device_idx], device_idx))
 	{
-	  gpu[device_idx].max_threads_per_block = device_properties.maxThreadsPerBlock; 
-	  //Add more properties
+	  std::cout << "-- GPU device ID : " << device_idx << " -> Success\n";
+	}
+	else 
+	{
+	  std::cerr << "-- GPU device ID : " << device_idx << " -> Fail\n";
 	}
       }
+
+#elif defined(NT2_HAS_OPENCL_SUPPORT)
+
+#endif
+
     }
-    
+
 }  }
