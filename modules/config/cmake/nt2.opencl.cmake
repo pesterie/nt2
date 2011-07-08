@@ -13,20 +13,22 @@ IF (WIN32)
 ELSE (WIN32)
 
 set(OPENCL_PATH_TO_SEARCH 
-    /usr/include/CL/
-    /usr/local/include/CL/
-    /usr/share/CL/
-    /usr/local/cuda/include/CL/
+    /usr/include/
+    /usr/local/include/
+    /usr/share/
+    /usr/local/cuda/include/
     /opt/
     /etc/
     )
   
   FIND_PATH(OPENCL_INCLUDE_DIR 
             NAMES 
-              cl.h
+              CL/cl.h
 	    PATHS
 	      ${OPENCL_PATH_TO_SEARCH}
 	    ) 
+
+message(${OPENCL_INCLUDE_DIR})
 
   FIND_LIBRARY(OPENCL_LIBRARIES OpenCL 
                ENV LD_LIBRARY_PATH

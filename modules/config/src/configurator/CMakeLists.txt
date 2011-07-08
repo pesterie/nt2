@@ -26,13 +26,20 @@ if(Boost_PROGRAM_OPTIONS_LIBRARY)
 set(LIBRARIES_TO_LINK ${Boost_PROGRAM_OPTIONS_LIBRARY})
 endif()
  
-if(CUDA_FOUND)
+if(NT2_CUDA_CONFIG)
   if(NT2_CUDA_LIB)
     set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_CUDA_LIB})
   else()
     message(SEND_ERROR "Can't find CUDA library !")
   endif()
+elseif(NT2_OPENCL_CONFIG)
+  if(NT2_OPENCL_LIB)
+    set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_OPENCL_LIB})
+  else()
+    message(SEND_ERROR "Can't find CUDA library !")
+  endif()
 endif()
+
 
 file( GLOB_RECURSE source_configurator_files
       ${PROJECT_SOURCE_DIR}/*
