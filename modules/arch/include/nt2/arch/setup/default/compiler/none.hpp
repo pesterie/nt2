@@ -6,8 +6,8 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_TRIPLETS_DEFAULT_COMPILER_NONE_HPP_INCLUDED
-#define NT2_ARCH_TRIPLETS_DEFAULT_COMPILER_NONE_HPP_INCLUDED
+#ifndef NT2_ARCH_SETUP_DEFAULT_COMPILER_NONE_HPP_INCLUDED
+#define NT2_ARCH_SETUP_DEFAULT_COMPILER_NONE_HPP_INCLUDED
 
 #if !defined(NT2_COMPILER)
   #define NT2_COMPILER_UNKNOWN

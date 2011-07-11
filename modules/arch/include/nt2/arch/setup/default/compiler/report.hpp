@@ -6,8 +6,8 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_TRIPLETS_DEFAULT_COMPILER_REPORT_HPP_INCLUDED
-#define NT2_ARCH_TRIPLETS_DEFAULT_COMPILER_REPORT_HPP_INCLUDED
+#ifndef NT2_ARCH_SETUP_DEFAULT_COMPILER_REPORT_HPP_INCLUDED
+#define NT2_ARCH_SETUP_DEFAULT_COMPILER_REPORT_HPP_INCLUDED
 
 ////////////////////////////////////////////////////////////////////////////////
 // Architecture configuration headers

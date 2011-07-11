@@ -6,11 +6,11 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_TRIPLETS_GENERATE_HPP_INCLUDED
-#define NT2_ARCH_TRIPLETS_GENERATE_HPP_INCLUDED
+#ifndef NT2_ARCH_SETUP_GENERATE_HPP_INCLUDED
+#define NT2_ARCH_SETUP_GENERATE_HPP_INCLUDED
 
-#include <nt2/arch/triplets/generate/arch.hpp>
-#include <nt2/arch/triplets/generate/compiler.hpp>
-#include <nt2/arch/triplets/generate/os.hpp>
+#include <nt2/arch/setup/generate/arch.hpp>
+#include <nt2/arch/setup/generate/compiler.hpp>
+#include <nt2/arch/setup/generate/os.hpp>
 
 #endif

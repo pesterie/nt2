@@ -6,8 +6,8 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_TRIPLETS_DEFAULT_ARCH_IA64_HPP_INCLUDED
-#define NT2_ARCH_TRIPLETS_DEFAULT_ARCH_IA64_HPP_INCLUDED
+#ifndef NT2_ARCH_SETUP_DEFAULT_ARCH_IA64_HPP_INCLUDED
+#define NT2_ARCH_SETUP_DEFAULT_ARCH_IA64_HPP_INCLUDED
 
 #if !defined(NT2_ARCH)
   #if defined(__ia64__)  || defined(_IA64)   || defined(__IA64__)   ||\

@@ -6,11 +6,11 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_TRIPLETS_FETCH_HPP_INCLUDED
-#define NT2_ARCH_TRIPLETS_FETCH_HPP_INCLUDED
+#ifndef NT2_ARCH_SETUP_FETCH_HPP_INCLUDED
+#define NT2_ARCH_SETUP_FETCH_HPP_INCLUDED
 
 // Needs to be updated by the fetcher
 
-#include <nt2/arch/triplets/fetch/fetched.hpp>
+#include <nt2/arch/setup/fetch/fetched.hpp>
 
 #endif
