@@ -118,19 +118,31 @@ message(STATUS "Generating Makefile system for Configurator...")
 if(CUDA_FOUND)
 execute_process(COMMAND ${CMAKE_COMMAND} -DNT2_CUDA_CONFIG=true ${NT2_CONFIG_ROOT}/src/configurator/
                 WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
-                RESULT_VARIABLE CMAKE_RESULT
-               )
+                RESULT_VARIABLE RESULT_CMAKE OUTPUT_VARIABLE CMAKE_OUTPUT
+		)
+if(RESULT_CMAKE)
+  message(FATAL_ERROR "CMake generation for Configurator failed.")
+endif()
+
 elseif(OPENCL_FOUND)
 execute_process(COMMAND ${CMAKE_COMMAND} -DNT2_OPENCL_CONFIG=true ${NT2_CONFIG_ROOT}/src/configurator/
                 WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
-                RESULT_VARIABLE CMAKE_RESULT
+                RESULT_VARIABLE RESULT_CMAKE OUTPUT_VARIABLE CMAKE_OUTPUT
                )
+if(RESULT_CMAKE)
+  message(FATAL_ERROR "CMake generation for Configurator failed.")
+endif()
+
 endif()
 
 message(STATUS "Compiling Configurator...")
 
 execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} configure
                 WORKING_DIRECTORY ${CONFIGURATOR_BUILD_DIR}
-                RESULT_VARIABLE BUILD_RESULT
+                RESULT_VARIABLE RESULT_MAKE OUTPUT_VARIABLE MAKE_OUTPUT
                )
+
+if(RESULT_MAKE)
+  message(FATAL_ERROR "Compiling Configurator failed.")
+endif()
 
