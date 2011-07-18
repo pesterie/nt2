@@ -10,9 +10,9 @@
 #define NT2_ARCH_SETUP_DEFAULT_ARCH_HPP_INCLUDED
 
 #include <nt2/arch/setup/default/arch/ia64.hpp>
-#include <nt2/arch/setup/default/arch/none.hpp>
 #include <nt2/arch/setup/default/arch/powerpc.hpp>
 #include <nt2/arch/setup/default/arch/report.hpp>
 #include <nt2/arch/setup/default/arch/x86.hpp>
+#include <nt2/arch/setup/default/arch/none.hpp>
 
 #endif

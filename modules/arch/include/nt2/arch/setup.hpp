@@ -9,9 +9,7 @@
 #ifndef NT2_ARCH_SETUP_HPP_INCLUDED
 #define NT2_ARCH_SETUP_HPP_INCLUDED
 
-//#if defined(NT2_DEFAULT_SETUP)
 #include <nt2/arch/setup/default.hpp>
-//#endif
 
 
 #endif /* NT2_ARCH_SETUP_HPP_INCLUDED */
