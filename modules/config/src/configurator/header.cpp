@@ -15,9 +15,9 @@
 
 namespace nt2 { namespace config { namespace utils {
   
-      header::header(std::string const& path, std::string const& name)
+      header::header(std::string const& path, std::string const& name) : struct_name(name)
       {
-        std::string full_path = path + name;
+        std::string full_path = path + name + ".hpp";
         if (h.is_open() == false)
         {
           h.open(full_path.c_str());
@@ -99,6 +99,18 @@ namespace nt2 { namespace config { namespace utils {
         else return 1;
       }
 
+      int header::add_typedef(std::string const& origin, std::string const& name)
+      {
+        if(h.is_open() == true) 
+        {
+          std::string full_typedef = "typedef " + origin + " " + name + ";\n";
+          typedefs.push_back(full_typedef);
+          return 0;
+        }
+        else return 1;
+      }
+
+
       int header::add(std::string const& s)
       {
         if(h.is_open() == true) { h << s; return 0;}
@@ -113,17 +125,22 @@ namespace nt2 { namespace config { namespace utils {
           add_include("boost/mpl/int.hpp");
           add_newline();
           h << "namespace nt2 { namespace arch {\n\n";
-          h << "struct arch\n{\n";
+          h << "struct ";
+          h << struct_name;
+          h << "\n{\n";
+
+          for (int i = 0; i < typedefs.size(); ++i)
+          {
+            h << "  " << typedefs[i] << "\n";  
+          }
 
           //generate metafunctions and runtime functions
-          
-          int j = 0;
           for (int i = 0; i < functions.size(); ++i)
           {
             h << "  typedef boost::mpl::int_<" << functions[i].upper  << "> " << functions[i].lower << ";\n";
             h << "  int get_" << functions[i].lower << "(void) { return " << functions[i].lower << "(); }\n"; 
           }
-          h << "}\n";
+          h << "};\n";
           add_newline();
           h << "} }\n";
           return 0;

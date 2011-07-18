@@ -27,6 +27,7 @@ namespace nt2 { namespace config { namespace utils {
     int add_define(std::string const& name);
     int add_macro(std::string const& name, std::string const& value);
     int add_macro(std::string const& name, int const& value);
+    int add_typedef(std::string const& origin, std::string const& name);
     int add(std::string const& s); 
     int generate_class(void);
 
@@ -54,8 +55,10 @@ namespace nt2 { namespace config { namespace utils {
       std::string value;
     };
 
+    std::vector<std::string> typedefs; 
     std::vector<function> functions;
     std::ofstream h;
+    std::string struct_name;
   };
 
 } } }

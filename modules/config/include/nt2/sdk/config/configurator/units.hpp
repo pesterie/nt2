@@ -11,10 +11,13 @@
 
 #include <string>
 
+
 namespace nt2 { namespace config { namespace utils {
 
   void generate_scalar_unit(std::string const& path, std::string const& name);
   void generate_simd_unit(std::string const& path, std::string const& name);
+  void generate_memory_hierarchy(std::string const& path, std::string const& name);
+  void generate_core_unit(std::string const& path, std::string const& name);
 
 } } }
 
