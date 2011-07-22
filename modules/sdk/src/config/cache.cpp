@@ -6,7 +6,7 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#include <nt2/sdk/config/configurator/cache.hpp>
+#include <nt2/sdk/config/cache.hpp>
 
 
 namespace nt2 { namespace config {
@@ -18,7 +18,7 @@ namespace nt2 { namespace config {
 ////////////////////////////////////////////////////////////////////////////////
 
 //Return the cache sizes according to the level 
-int get_cache_infos(cache_report &cache)
+int cache_infos(cache_report &cache)
 {
   int regs[4];
   //int nb_call_cpuid;
@@ -28,20 +28,20 @@ int get_cache_infos(cache_report &cache)
 
   __cpuid(regs, 0x00000000);
   
-  if(get_vendor(regs, INTEL))
+  if(processor_vendor(regs, INTEL))
   {
     //__cpuid(regs, 0x00000002);
     //nb_call_cpuid = utils::get_byte(regs[0], 0);
-    return get_cache_sizes_intel(cache);
+    return cache_sizes_intel(cache);
   }
-  else if(get_vendor(regs, AMD))
+  else if(processor_vendor(regs, AMD))
   {
-    return get_cache_sizes_amd(cache);
+    return cache_sizes_amd(cache);
   }
   else return -1;
 }
 
-int get_cache_sizes_intel(cache_report &cache)
+int cache_sizes_intel(cache_report &cache)
 {
   int regs[4] = {0,0,0,0};
   int byte0, byte1, byte2, byte3;
@@ -74,7 +74,7 @@ int get_cache_sizes_intel(cache_report &cache)
   return 0;
 }
 
-int get_cache_sizes_amd(cache_report &cache)
+int cache_sizes_amd(cache_report &cache)
 {
   int regs[4] = {0,0,0,0};
   __cpuidex(regs,0x80000005,0);
@@ -90,7 +90,7 @@ int get_cache_sizes_amd(cache_report &cache)
 }
 
 //Return the coherency line size
-int get_cache_coherency_line_size(cache_report const& cache)
+int cache_coherency_line_size(cache_report const& cache)
 {
   return utils::lcm( cache.l3, utils::lcm(cache.l2, cache.l1) );
 }

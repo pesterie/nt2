@@ -17,9 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // NT2 configuration files
 ////////////////////////////////////////////////////////////////////////////////
-#include <nt2/sdk/config/os.hpp>
-#include <nt2/sdk/config/arch.hpp>
-#include <nt2/sdk/config/compiler.hpp>
+#include <nt2/arch/setup.hpp>
 #include <nt2/sdk/config/attributes.hpp>
 #include <nt2/sdk/config/type_lists.hpp>
 

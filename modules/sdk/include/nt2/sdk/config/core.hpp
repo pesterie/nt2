@@ -6,19 +6,19 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef _CORE_HPP_INCLUDED_
-#define _CORE_HPP_INCLUDED_
+#ifndef NT2_SDK_CONFIG_CORE_HPP_INCLUDED
+#define NT2_SDK_CONFIG_CORE_HPP_INCLUDED
 
-#include <nt2/sdk/config/configurator/cpuid.hpp>
-#include <nt2/sdk/config/configurator/utils.hpp>
+#include <nt2/sdk/config/cpuid.hpp>
+#include <nt2/sdk/config/utils.hpp>
 
 namespace nt2{ namespace config {
 
 bool is_multithreaded(void);
-int  get_threads(void);
-int  get_physical_cores(void);
-int  get_logical_cores(void);
+int  nb_threads(void);
+int  nb_physical_cores(void);
+int  nb_logical_cores(void);
 
 } }
 
-#endif /* _CORE_HPP_INCLUDED_ */
+#endif /* NT2_SDK_CONFIG_CORE_HPP_INCLUDED */

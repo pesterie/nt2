@@ -6,7 +6,7 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#include <nt2/sdk/config/configurator/cpuid.hpp>
+#include <nt2/sdk/config/cpuid.hpp>
 #include <string>
 
 namespace nt2 { namespace config{
@@ -39,7 +39,7 @@ void __cpuidex(int CPUInfo[4],int InfoType,int ECXValue)
 #endif
 
 
-bool get_vendor(const int abcd[4], const char* vendor)
+bool processor_vendor(const int abcd[4], const char* vendor)
 {
   return (abcd[1] == ((int*)(vendor))[0] && abcd[2] == ((int*)(vendor))[2] && abcd[3] == ((int*)(vendor))[1]);
 }

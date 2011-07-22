@@ -6,10 +6,10 @@
 ///                 See accompanying file LICENSE.txt or copy at
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
-#ifndef NT2_SDK_CONFIG_CONFIGURATOR_GPU_HPP
-#define NT2_SDK_CONFIG_CONFIGURATOR_GPU_HPP
+#ifndef NT2_SDK_CONFIG_GPU_HPP
+#define NT2_SDK_CONFIG_GPU_HPP
 
-#include <nt2/sdk/config/infos.hpp>
+//#include <nt2/sdk/config/infos.hpp>
 
 #ifdef NT2_HAS_CUDA_SUPPORT
 #include <cuda_runtime_api.h>

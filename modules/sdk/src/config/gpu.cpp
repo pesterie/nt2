@@ -6,7 +6,7 @@
 ///                 See accompanying file LICENSE.txt or copy at
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
-#include <nt2/sdk/config/configurator/gpu.hpp>
+#include <nt2/sdk/config/gpu.hpp>
 #include <boost/array.hpp>
 #include <iostream>
 #include <cstring>

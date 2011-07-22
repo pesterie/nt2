@@ -6,8 +6,8 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef _UTILS_HPP_INCLUDED_
-#define _UTILS_HPP_INCLUDED_
+#ifndef NT2_SDK_CONFIG_UTILS_HPP_INCLUDED
+#define NT2_SDK_CONFIG_UTILS_HPP_INCLUDED
 
 #include <cassert>
 #include <iostream>
@@ -18,10 +18,10 @@ bool has_bit_set(int value, int bit);
 int  get_byte(int reg, int pos);
 int  get_range(int reg, int begin, int end);
 int  gcd(int a, int b );
-int lcm(int a, int b );
+int  lcm(int a, int b );
 
 } } }
 
-#endif /* _UTILS_HPP_INCLUDED_ */
+#endif /* NT2_SDK_CONFIG_UTILS_HPP_INCLUDED */
 
 

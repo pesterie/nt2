@@ -6,7 +6,7 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  *******************************************************************************/
-#include <nt2/sdk/config/configurator/simd.hpp>
+#include <nt2/sdk/config/simd.hpp>
 
 namespace nt2{ namespace config {
 
@@ -16,7 +16,7 @@ int has_vectorial_extension(std::string const& target)
 
   __cpuid(regs,0x00000000);
 
-  if(get_vendor(regs, INTEL))
+  if(processor_vendor(regs, INTEL))
   {
     matcher options_intel[9] =
       {
@@ -46,7 +46,7 @@ int has_vectorial_extension(std::string const& target)
     __cpuid(regs,m.function);
     return utils::has_bit_set(regs[m.reg],m.bit);
   }
-  else if(get_vendor(regs, AMD))
+  else if(processor_vendor(regs, AMD))
   {
      matcher options_amd[10] =
       {

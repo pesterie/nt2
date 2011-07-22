@@ -6,7 +6,7 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#include <nt2/sdk/config/configurator/utils.hpp>
+#include <nt2/sdk/config/utils.hpp>
 
 namespace nt2{ namespace config { namespace utils{
 

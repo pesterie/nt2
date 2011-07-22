@@ -6,8 +6,8 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef _CPUID_HPP_INCLUDED_
-#define _CPUID_HPP_INCLUDED_
+#ifndef NT2_SDK_CONFIG_CPUID_HPP_INCLUDED
+#define NT2_SDK_CONFIG_CPUID_HPP_INCLUDED
 
 #define INTEL "GenuineIntel"
 #define AMD   "AuthenticAMD"
@@ -25,8 +25,8 @@ enum { eax,ebx,ecx,edx };
 #include <intrin.h>
 #endif
 
-bool get_vendor(const int abcd[4], const char* vendor);
+bool processor_vendor(const int abcd[4], const char* vendor);
 
 } }
 
-#endif /* _CPUID_HPP_INCLUDED_ */
+#endif /* NT2_SDK_CONFIG_CPUID_HPP_INCLUDED */
