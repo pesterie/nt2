@@ -6,52 +6,58 @@
 #                 See accompanying file LICENSE.txt or copy at
 #                     http://www.boost.org/LICENSE_1_0.txt
 ################################################################################
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 project(configurator)
 
 set(CMAKE_MODULE_PATH 
-    ${PROJECT_SOURCE_DIR}/cmake/ 
-    ${PROJECT_BINARY_DIR}/cmake/
+    ${PROJECT_SOURCE_DIR}/cmake/
+    ${PROJECT_SOURCE_DIR}/../../cmake/
    )
 
-include(nt2.configurator)
 
-include_directories(${NT2_CONFIGURATOR_INCLUDE_DIR})
+set(NT2_CONCEPT_GENERATE_PATH ${PROJECT_SOURCE_DIR}/../../modules/arch/concepts/generate/})
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.46.0 COMPONENTS program_options REQUIRED)
+find_package(NT2 COMPONENTS sdk REQUIRED)
 
-if(Boost_PROGRAM_OPTIONS_LIBRARY)
-set(LIBRARIES_TO_LINK ${Boost_PROGRAM_OPTIONS_LIBRARY})
-endif()
- 
-if(NT2_CUDA_CONFIG)
-  if(NT2_CUDA_LIB)
-    set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_CUDA_LIB})
-  else()
-    message(SEND_ERROR "Can't find CUDA library !")
-  endif()
-elseif(NT2_OPENCL_CONFIG)
-  if(NT2_OPENCL_LIB)
-    set(LIBRARIES_TO_LINK ${LIBRARIES_TO_LINK} ${NT2_OPENCL_LIB})
-  else()
-    message(SEND_ERROR "Can't find CUDA library !")
-  endif()
-endif()
+if(NOT NT2_FOUND)
+  message(FATAL_ERROR "Can not find NT² ! Dependence not met.")
+else()
 
+  include(nt2.gpu)
+  include(nt2.threading)
+  
+  set(Boost_USE_STATIC_LIBS ON)
+  find_package(Boost COMPONENTS program_options REQUIRED)
 
-file( GLOB_RECURSE source_configurator_files
-      ${PROJECT_SOURCE_DIR}/*
+  configure_file(${PROJECT_SOURCE_DIR}/cmake/infos.hpp.cmake 
+    ${PROJECT_BINARY_DIR}/include/infos.hpp
     )
 
-add_executable(configure EXCLUDE_FROM_ALL ${source_configurator_files} )
+  set(CONFIGURATOR_INCLUDES  ${CONFIGURATOR_INCLUDES} ${PROJECT_SOURCE_DIR}/include/ ${PROJECT_BINARY_DIR}/include/)
+  set(CONFIGURATOR_LIBRARIES ${NT2_LIBRARIES})
+ 
+  if(Boost_PROGRAM_OPTIONS_LIBRARY)
+    set(CONFIGURATOR_LIBRARIES ${CONFIGURATOR_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  endif()
+ 
 
-set_property(TARGET configure PROPERTY 
-             RUNTIME_OUTPUT_DIRECTORY ${NT2_BUILD_DIR}
-            )
-set_property(TARGET configure PROPERTY 
-             OUTPUT_NAME "configure.run" 
-             )
+  file( GLOB_RECURSE source_configurator_files
+        ${PROJECT_SOURCE_DIR}/src/*
+      )
 
-target_link_libraries(configure ${LIBRARIES_TO_LINK})
+  include_directories(${CONFIGURATOR_INCLUDES})
+  
+  add_executable(configure EXCLUDE_FROM_ALL ${source_configurator_files} )
+  
+  set_property(TARGET configure PROPERTY 
+    RUNTIME_OUTPUT_DIRECTORY ${NT2_BUILD_DIR}
+    )
+  
+  set_property(TARGET configure PROPERTY 
+    OUTPUT_NAME "configure.run" 
+    )
+  
+  target_link_libraries(configure ${CONFIGURATOR_LIBRARIES})
+    
+endif()

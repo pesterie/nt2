@@ -10,10 +10,18 @@
 include(NT2Module)
 nt2_module_source_setup(sdk)
 
-file( GLOB_RECURSE source_sdk_files
+################################################################################
+# Generate bootstrap.hpp
+################################################################################
+nt2_module_configure_file(config/bootstrap.hpp.cmake
+                          nt2/sdk/config/bootstrap.hpp
+                         )
+
+file( GLOB_RECURSE SOURCES
       ${NT2_SDK_ROOT}/src/*
+      ${NT2_CONFIG_ROOT}/src/*.cpp
     )
-SET(SOURCES ${source_sdk_files} ${NT2_CONFIG_ROOT}/src/version.cpp)
+
 nt2_module_add_library(nt2 ${SOURCES})
 
 include(nt2.preprocess)

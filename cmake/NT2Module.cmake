@@ -55,6 +55,12 @@ macro(nt2_module_source_setup module)
            COMPONENT ${module}
            FILES_MATCHING PATTERN "*.cmake"
          )
+
+  install( DIRECTORY ${NT2_${module_U}_ROOT}/cmake
+           DESTINATION ${NT2_INSTALL_SHARE_DIR}
+           COMPONENT ${module}
+           FILES_MATCHING PATTERN "*.cpp"
+         )
   
 endmacro()
 
