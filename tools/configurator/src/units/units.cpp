@@ -6,11 +6,11 @@
 ///                 See accompanying file LICENSE.txt or copy at
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
-#include <nt2/sdk/config/configurator/units.hpp>
-#include <nt2/sdk/config/configurator/header.hpp>
-#include <nt2/sdk/config/configurator/simd.hpp>
-#include <nt2/sdk/config/configurator/cache.hpp>
-#include <nt2/sdk/config/configurator/core.hpp>
+#include <units/units.hpp>
+#include <utils/header.hpp>
+#include <nt2/sdk/config/simd.hpp>
+#include <nt2/sdk/config/cache.hpp>
+#include <nt2/sdk/config/core.hpp>
 #include <boost/array.hpp>
 #include <nt2/arch/setup.hpp>
 
@@ -112,7 +112,7 @@ namespace nt2 { namespace config { namespace utils {
     // Getting cache specs
     nt2::config::cache_report cache;
     std::cout << "Detecting cache specifications...\n";
-    if( nt2::config::get_cache_infos(cache) == 0)
+    if( nt2::config::cache_infos(cache) == 0)
       {
         if(cache.L1 > 0) 
           {
@@ -145,7 +145,7 @@ namespace nt2 { namespace config { namespace utils {
             std::cout << "-- L3 cache line size : " << cache.l3 << " bytes\n";
           }
         
-        int coh = nt2::config::get_cache_coherency_line_size(cache);
+        int coh = nt2::config::cache_coherency_line_size(cache);
         if(coh > 0) memory_hierarchy.add_macro("COHERENCY_LINE_SIZE", coh);
       }
     else std::cout << "-- Getting cache specifications failed.";
@@ -172,7 +172,7 @@ namespace nt2 { namespace config { namespace utils {
 
     // Detecting Multicore capabilities
     std::cout << "Detecting Multithreading capabilities...\n";
-    int nb_cores = nt2::config::get_threads();
+    int nb_cores = nt2::config::nb_threads();
     if(nb_cores > 0) 
     {
       core_unit.add_macro("NB_CORES", nb_cores);
@@ -180,7 +180,7 @@ namespace nt2 { namespace config { namespace utils {
     }
     else std::cerr << "-- Not a multicore architecture (Core test failed).\n";
       
-    int nb_logical_cores_per_unit = nt2::config::get_logical_cores();
+    int nb_logical_cores_per_unit = nt2::config::nb_logical_cores();
     if(nb_logical_cores_per_unit > 0) 
     {
       core_unit.add_macro("NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
@@ -188,7 +188,7 @@ namespace nt2 { namespace config { namespace utils {
     }
     else std::cerr << "-- Not a multicore architecture (Logical Core test failed).\n";
 
-    int nb_physical_cores = nt2::config::get_physical_cores();
+    int nb_physical_cores = nt2::config::nb_physical_cores();
     if(nb_physical_cores > 0) 
     {
       core_unit.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);

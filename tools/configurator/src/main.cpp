@@ -6,14 +6,15 @@
 ///                 See accompanying file LICENSE.txt or copy at
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
+#include <utils/header.hpp>
+#include <utils/license.hpp>
+#include <units/units.hpp>
+#include <infos.hpp>      
+#include <nt2/sdk/config/gpu.hpp>      
 #include <boost/program_options.hpp>
 #include <boost/array.hpp>
 #include <iostream>
 #include <string>
-#include <nt2/sdk/config/configurator/header.hpp>
-#include <nt2/sdk/config/configurator/gpu.hpp>      
-#include <nt2/sdk/config/configurator/units.hpp>      
-#include <nt2/sdk/config/infos.hpp>
 #include <iterator>
 #include <cassert>
 #include <cctype>

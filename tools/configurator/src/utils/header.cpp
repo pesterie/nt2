@@ -7,8 +7,8 @@
 ///                     http://www.boost.org/LICENSE_1_0.txt
 //////////////////////////////////////////////////////////////////////////////
 
-#include <nt2/sdk/config/configurator/header.hpp>
-#include <nt2/sdk/config/configurator/license.hpp>
+#include <utils/header.hpp>
+#include <utils/license.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cctype>
 #include <cassert>
