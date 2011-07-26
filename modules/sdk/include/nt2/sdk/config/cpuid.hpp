@@ -9,19 +9,21 @@
 #ifndef NT2_SDK_CONFIG_CPUID_HPP_INCLUDED
 #define NT2_SDK_CONFIG_CPUID_HPP_INCLUDED
 
+#include <nt2/predef/compiler.hpp>
+
 #define INTEL "GenuineIntel"
 #define AMD   "AuthenticAMD"
 
 namespace nt2{ namespace config{
 
-#if defined(__GNUC__)
+#if defined(NT2_COMPILER_GNU_C)
 
 void __cpuid( int CPUInfo[4],int InfoType);
 void __cpuidex(int CPUInfo[4],int InfoType,int ECXValue);
 
 enum { eax,ebx,ecx,edx };
 
-#elif defined(_MSC_VER)
+#elif defined(NT2_COMPILER_MSVC)
 #include <intrin.h>
 #endif
 
