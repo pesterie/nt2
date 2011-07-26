@@ -11,7 +11,7 @@
 
 namespace nt2 { namespace config{
 
-#ifdef __GNUC__
+#ifdef NT2_COMPILER_GNU_C
 void __cpuid( int CPUInfo[4],int InfoType)
 {
   __asm__ __volatile__
@@ -34,7 +34,7 @@ void __cpuidex(int CPUInfo[4],int InfoType,int ECXValue)
   );
 }
 
-#elif defined(_MSC_VER)
+#elif defined(NT2_COMPILER_MSVC)
 #include <intrin.h>
 #endif
 
