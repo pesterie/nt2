@@ -6,18 +6,22 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_SETUP_DEFAULT_ARCH_IA64_HPP_INCLUDED
+#if !defined(NT2_ARCH_SETUP_DEFAULT_ARCH_IA64_HPP_INCLUDED) &&      \
+    (defined(__ia64__)  || defined(_IA64)   || defined(__IA64__)   ||\
+    defined(__ia64)    || defined(_M_IA64) )
 #define NT2_ARCH_SETUP_DEFAULT_ARCH_IA64_HPP_INCLUDED
 
-#if !defined(NT2_ARCH)
-
-  #if defined(__ia64__)  || defined(_IA64)   || defined(__IA64__)   ||\
-      defined(__ia64)    || defined(_M_IA64) || defined(DOXYGEN_ONLY) 
+#if !defined(NT2_ARCH) || defined(DOXYGEN_ONLY) 
 
     #define NT2_ARCH_IA64
     #define NT2_ARCH "Intel 64"
     #define NT2_ARCH_ALIGNMENT 16
+    #define NT2_INTEGER_REGISTERS 128
+    #define NT2_INTEGER_REGISTERS_WIDTH 64
+    #define NT2_FLOAT_REGISTERS 128
+    #define NT2_FLOAT_REGISTERS_WIDTH 82
+    #define NT2_SIMD_REGISTERS 128
 
-  #endif
 #endif
+
 #endif

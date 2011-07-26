@@ -9,7 +9,7 @@
 #ifndef NT2_ARCH_SETUP_DEFAULT_ARCH_NONE_HPP_INCLUDED
 #define NT2_ARCH_SETUP_DEFAULT_ARCH_NONE_HPP_INCLUDED
 
-#if !defined(NT2_ARCH)
+#if !defined(NT2_ARCH) || defined(DOXYGEN_ONLY)
   #define NT2_ARCH_UNKNOWN
   #define NT2_ARCH "unknown"
   #define NT2_ARCH_ALIGNMENT sizeof(void*)

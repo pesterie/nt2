@@ -6,19 +6,21 @@
  *                 See accompanying file LICENSE.txt or copy at
  *                     http://www.boost.org/LICENSE_1_0.txt
  ******************************************************************************/
-#ifndef NT2_ARCH_SETUP_DEFAULT_ARCH_POWERPC_HPP_INCLUDED
-#define NT2_ARCH_SETUP_DEFAULT_ARCH_POWERPC_HPP_INCLUDED
+#if !defined(NT2_ARCH_PPC_POWERPC_HPP_INCLUDED) &&  \
+    (defined(__powerpc)    || defined(__powerpc__)   \
+    ||  defined(__POWERPC__)  || defined(__ppc__)   \
+    ||  defined(_M_PPC)       || defined(_ARCH_PPC)) 
+#define NT2_ARCH_PPC_POWERPC_HPP_INCLUDED
 
-#if !defined(NT2_ARCH)
-  #if   defined(__powerpc)    || defined(__powerpc__) \
-    ||  defined(__POWERPC__)  || defined(__ppc__)     \
-    ||  defined(_M_PPC)       || defined(_ARCH_PPC)   \
-    ||  defined(DOXYGEN_ONLY)
+#if !defined(NT2_ARCH) || defined(DOXYGEN_ONLY)
 
     #define NT2_ARCH_POWERPC
     #define NT2_ARCH "Power PC"
     #define NT2_ARCH_ALIGNMENT 16
+    #define NT2_INTEGER_REGISTERS 32
+    #define NT2_INTEGER_REGISTERS_WIDTH 32
+    #define NT2_FLOAT_REGISTERS 32
+    #define NT2_FLOAT_REGISTERS_WIDTH 64
 
-  #endif
 #endif
 #endif
