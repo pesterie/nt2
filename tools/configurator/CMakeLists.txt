@@ -16,8 +16,6 @@ set(CMAKE_MODULE_PATH
    )
 
 
-set(NT2_CONCEPT_GENERATE_PATH ${PROJECT_SOURCE_DIR}/../../modules/arch/concepts/generate/})
-
 find_package(NT2 COMPONENTS sdk REQUIRED)
 
 if(NOT NT2_FOUND)
@@ -27,6 +25,10 @@ else()
   include(nt2.gpu)
   include(nt2.threading)
   
+  set(NT2_UNITS_HPP_GENERATE_PATH /usr/local/include/nt2/platform/)
+  file(MAKE_DIRECTORY ${NT2_UNITS_HPP_GENERATE_PATH}/units/)  
+  set(NT2_UNITS_GENERATE_PATH ${NT2_UNITS_HPP_GENERATE_PATH}/units/)
+
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost COMPONENTS program_options REQUIRED)
 

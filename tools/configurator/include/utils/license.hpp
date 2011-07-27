@@ -18,6 +18,6 @@
 ///                     http://www.boost.org/LICENSE_1_0.txt\n\
 //////////////////////////////////////////////////////////////////////////////\n" 
 
-#define NT2_CONCEPT_GUARD "NT2_ARCH_CONCEPTS_GENERATE_"
+#define NT2_CONCEPT_GUARD "NT2_PLATFORM_UNITS_"
 
 #endif

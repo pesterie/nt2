@@ -34,97 +34,81 @@ namespace nt2 { namespace config { namespace utils {
       int header::add_newline(void) 
       { 
         if(h.is_open() == true) { h << "\n"; return 0; }
-        else return 1;
+        else return -1;
       }
 
-      int header::add_include(std::string const& include)
+      void header::add_include(std::string const& include)
       {
-        if(h.is_open() == true) 
-        {
-          h << "#include <" << include << ">\n";
-          return 0;
-        }
-        else return 1;
+        includes.push_back(include);
       }
       
-      int header::add_define(std::string const& name)
+      void header::add_define(std::string const& name)
       {
-        if(h.is_open() == true) 
-        {
-          h << "#define NT2_" << name << "\n"; 
-          return 0;
-        }
-        else return 1;
-      }
-
-      void header::add_function(std::string const& name, std::string const& value)
-      {
-        std::string temp;
-        int i = 0;
-        while(name[i]) { temp.push_back(tolower(name[i])); ++i; }
-        functions.push_back(function(name,temp,value));
+        defines.push_back(name);
       }
       
-      void header::add_function(std::string const& name, int const& value)
+      void header::add_macro(std::string const& name, std::string const& value)
       {
-        std::string temp;
-        int i = 0;
-        while(name[i]) { temp.push_back(tolower(name[i])); ++i; }
-        functions.push_back(function(name,
-                                     temp,
-                                     boost::lexical_cast<std::string>(value)
-                                     )
-                            );
-      }
-      
-      int header::add_macro(std::string const& name, std::string const& value)
-      {
-        if(h.is_open() == true) 
-        {
-          h << "#define NT2_" << name << " " << value << "\n"; 
-          add_function(name, value);
-          return 0;
-        }
-        else return 1;
+        macros.push_back(function(name,value));
       }
 
-      int header::add_macro(std::string const& name, int const& value)
+      void header::add_macro(std::string const& name, int const& value)
       {
-        if(h.is_open() == true) 
-        {
-          h << "#define NT2_" << name << " " << value << "\n";
-          add_function(name, value);
-          return 0;
-        }
-        else return 1;
+        macros.push_back(function(name,boost::lexical_cast<std::string>(value)));
       }
 
-      int header::add_typedef(std::string const& origin, std::string const& name)
+      void header::add_typedef(std::string const& origin, std::string const& name)
       {
-        if(h.is_open() == true) 
-        {
-          std::string full_typedef = "typedef " + origin + " " + name + ";\n";
-          typedefs.push_back(full_typedef);
-          return 0;
-        }
-        else return 1;
+        std::string fullTypedef = "typedef " + origin + " " + name + ";\n";
+        typedefs.push_back(fullTypedef);
       }
 
+      void header::add_metafunction(std::string const& name, std::string const& static_value)
+      {
+        metafunctions.push_back(function(name,static_value));
+      }
+
+      void header::add_metafunction(std::string const& name, int const& static_value)
+      {
+        metafunctions.push_back(function(name,boost::lexical_cast<std::string>(static_value)));
+      }
+
+      void header::add_methode(std::string const& name, std::string const& value)
+      {
+        methodes.push_back(function(name,value));
+      }
+
+      void header::add_methode(std::string const& name, int const& value)
+      {
+        methodes.push_back(function(name,boost::lexical_cast<std::string>(value)));
+      }
 
       int header::add(std::string const& s)
       {
         if(h.is_open() == true) { h << s; return 0;}
-        else return 1;
+        else return -1;
       }
 
       int header::generate_class(void)
       {
         if(h.is_open() == true)
         {
-          add_newline();
           add_include("boost/mpl/int.hpp");
+          //generate all includes
+          for (int i = 0; i < includes.size(); ++i)
+          {
+            h << "#include <" << includes[i] << ">\n";
+          }
           add_newline();
-          h << "namespace nt2 { namespace arch {\n\n";
+
+          //generate all defines
+          for (int i = 0; i < defines.size(); ++i)
+          {
+            h << "#define " << defines[i] << "\n";
+          }
+
+          add_newline();
+          h << "namespace nt2 { namespace platform {\n\n";
           h << "struct ";
           h << struct_name;
           h << "\n{\n";
@@ -134,18 +118,25 @@ namespace nt2 { namespace config { namespace utils {
             h << "  " << typedefs[i] << "\n";  
           }
 
-          //generate metafunctions and runtime functions
-          for (int i = 0; i < functions.size(); ++i)
+          //generate metafunctions
+          
+          for (int i = 0; i < metafunctions.size(); ++i)
           {
-            h << "  typedef boost::mpl::int_<" << functions[i].upper  << "> " << functions[i].lower << ";\n";
-            h << "  int get_" << functions[i].lower << "(void) { return " << functions[i].lower << "(); }\n"; 
+            h << "  typedef boost::mpl::int_<" << metafunctions[i].val  << "> " << metafunctions[i].name << ";\n";
           }
+
+          //generate runtime functions
+          for (int i = 0; i < methodes.size(); ++i)
+          {
+            h << "  inline int " << methodes[i].name << "(void) const { return " << methodes[i].val << "; }\n"; 
+          }
+
           h << "};\n";
           add_newline();
           h << "} }\n";
           return 0;
         }
-        else return 1;
+        else return -1;
       }
 
       header::~header()
