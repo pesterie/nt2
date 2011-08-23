@@ -52,9 +52,10 @@ Release
 build
 
 ################################################################################
-# Ignore local bootstrap file
+# Ignore local generate file
 ################################################################################
-modules/arch/include/nt2/arch/concepts/default/bootstrap.hpp
+modules/platform/nt2/include/nt2/platform/units.hpp
+modules/platform/include/nt2/platform/units/
 
 ################################################################################
 # Ignore buidl files and python compilation
