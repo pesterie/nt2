@@ -15,8 +15,7 @@ set(CMAKE_MODULE_PATH
     ${PROJECT_SOURCE_DIR}/../../cmake/
    )
 
-
-find_package(NT2 COMPONENTS sdk REQUIRED)
+find_package(NT2 COMPONENTS sdk platform REQUIRED)
 
 if(NOT NT2_FOUND)
   message(FATAL_ERROR "Can not find NT² ! Dependence not met.")
@@ -24,8 +23,8 @@ else()
 
   include(nt2.gpu)
   include(nt2.threading)
-  
-  set(NT2_UNITS_HPP_GENERATE_PATH /usr/local/include/nt2/platform/)
+
+  set(NT2_UNITS_HPP_GENERATE_PATH ${NT2_PLATFORM_INCLUDE_DIR}/nt2/platform/)
   file(MAKE_DIRECTORY ${NT2_UNITS_HPP_GENERATE_PATH}/units/)  
   set(NT2_UNITS_GENERATE_PATH ${NT2_UNITS_HPP_GENERATE_PATH}/units/)
 
