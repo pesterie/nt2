@@ -129,45 +129,29 @@ namespace nt2 { namespace config { namespace utils {
   void generate_core_unit(std::string const& path, std::string const& name)
   {
     header core_unit(path, name);
+    std::vector<std::string> v;
+    v.push_back("MemoryUnit");
+    v.push_back("SimdUnit");
+    v.push_back("ScalarUnit");
     
+    core_unit.set_templates(v);
     core_unit.add_include("nt2/platform/units/scalar_unit.hpp");
-    core_unit.add_typedef("scalar_unit", "scalarUnit");
+    core_unit.add_typedef("ScalarUnit", "scalar_unit");
     core_unit.add_include("nt2/platform/units/simd_unit.hpp");
-    core_unit.add_typedef("simd_unit", "simdUnit");
+    core_unit.add_typedef("SimdUnit", "simd_unit");
     core_unit.add_include("nt2/platform/units/memory_unit.hpp");
-    core_unit.add_typedef("memory_unit", "memoryUnit");
-
-    // Detecting Multicore capabilities
-    std::cout << "Detecting Multithreading capabilities...\n";
-    int nb_cores = nt2::config::nb_threads();
-    if(nb_cores > 0) 
-    {
-      core_unit.add_macro("NB_CORES", nb_cores);
-      core_unit.add_metafunction("nb_core_", "NB_CORE");
-      core_unit.add_methode("nb_core", "nb_core_()");
-      std::cout << "-- Total cores found (Logical and Physical) : " << nb_cores << "\n";
-    }
-    else std::cerr << "-- Not a multicore architecture (Core test failed).\n";
+    core_unit.add_typedef("MemoryUnit", "memory_unit");
       
-    int nb_logical_cores_per_unit = nt2::config::nb_logical_cores();
+    int nb_logical_cores_per_unit = nt2::config::nb_threads();
     if(nb_logical_cores_per_unit > 0) 
     {
-      core_unit.add_macro("NB_LOGICAL_CORES_PER_UNIT", nb_logical_cores_per_unit);
-      core_unit.add_metafunction("nb_logical_core_per_unit_", "NB_LOGICAL_CORES_PER_UNIT");
-      core_unit.add_methode("nb_logical_core_per_unit", "nb_logical_core_per_unit_()");
+      core_unit.add_define("IS_HYPERTHREADED");
+      core_unit.add_macro("NB_LOGICAL_CORES", nb_logical_cores_per_unit);
+      core_unit.add_metafunction("nb_logical_cores_", "NB_LOGICAL_CORES");
+      core_unit.add_methode("nb_logical_cores", "nb_logical_cores_()");
       std::cout << "-- Logical cores per unit found : " << nb_logical_cores_per_unit << "\n";
     }
     else std::cerr << "-- Not a multicore architecture (Logical Core test failed).\n";
-
-    int nb_physical_cores = nt2::config::nb_physical_cores();
-    if(nb_physical_cores > 0) 
-    {
-      core_unit.add_macro("NB_PHYSICAL_CORES", nb_physical_cores);
-      core_unit.add_metafunction("nb_physical_core_", "NB_PHYSICAL_CORE");
-      core_unit.add_methode("nb_physical_core", "nb_physical_core_()");
-      std::cout << "-- Physical cores found : " << nb_physical_cores << "\n";
-    }
-    else std::cerr << "-- Not a multicore architecture (Physical Core test failed).\n";
 
     core_unit.generate_class();
   }

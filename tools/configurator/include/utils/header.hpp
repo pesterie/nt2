@@ -32,6 +32,7 @@ namespace nt2 { namespace config { namespace utils {
     void add_metafunction(std::string const& name, int const& stadtic_value);
     void add_methode(std::string const& name, std::string const& value);
     void add_methode(std::string const& name, int const& value);
+    void set_templates(std::vector<std::string> const& args);
     int  generate_class(void);
 
   protected :
@@ -62,8 +63,10 @@ namespace nt2 { namespace config { namespace utils {
     std::vector<function> macros;
     std::vector<function> metafunctions;
     std::vector<function> methodes;
+    std::vector<std::string> templates;
     std::ofstream h;
     std::string struct_name;
+    bool is_template;
   };
 
 } } }

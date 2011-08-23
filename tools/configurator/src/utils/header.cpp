@@ -83,6 +83,12 @@ namespace nt2 { namespace config { namespace utils {
         methodes.push_back(function(name,boost::lexical_cast<std::string>(value)));
       }
 
+      void header::set_templates(std::vector<std::string>const& args)
+      {
+        is_template=true;
+        templates = args;
+      }
+
       int header::add(std::string const& s)
       {
         if(h.is_open() == true) { h << s; return 0;}
@@ -107,9 +113,29 @@ namespace nt2 { namespace config { namespace utils {
             h << "#define " << defines[i] << "\n";
           }
 
+          //generate all macros
+          for (int i = 0; i < macros.size(); ++i)
+          {
+            h << "#define " << macros[i].name << " " << macros[i].val << "\n";
+          }
+
           add_newline();
           h << "namespace nt2 { namespace platform {\n\n";
-          h << "struct ";
+
+          if(is_template==true)
+          {
+            h << "template<";
+            for (int i = 0; i < templates.size(); ++i)
+            {
+              if(i == (templates.size() - 1))
+              {
+                h << "class " << templates[i] << ">";
+              }
+              else h << "class " << templates[i] << ",";
+            }
+          }
+
+          h << "\nstruct ";
           h << struct_name;
           h << "\n{\n";
 
@@ -119,7 +145,6 @@ namespace nt2 { namespace config { namespace utils {
           }
 
           //generate metafunctions
-          
           for (int i = 0; i < metafunctions.size(); ++i)
           {
             h << "  typedef boost::mpl::int_<" << metafunctions[i].val  << "> " << metafunctions[i].name << ";\n";

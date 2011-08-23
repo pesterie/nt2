@@ -56,18 +56,6 @@ int main(int ac, char *av[])
       //Generating Core Unit
       cf::utils::generate_core_unit(NT2_UNITS_GENERATE_PATH, "core_unit");
 
-      // std::cout << "Detecting GPU devices specifications...\n";
-      // nt2::config::gpu_report gpu;
-      // int result = nt2::config::get_gpu_devices_properties(gpu);
-      // if(gpu.size() != 0) 
-      // {
-      //   for(int idx = 0; idx < gpu.size(); ++idx)
-      //   {
-          
-      //   }
-      // }
-      // else std::cerr << "No GPU Devices detected!\n";
-     
     }
     else if(vm.count("manual"))
     {
